@@ -3,10 +3,14 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { AreaSettingComponent } from './area-setting/area-setting.component';
+import { AreaConfigComponent } from './area-config/area-config.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    AreaSettingComponent,
+    AreaConfigComponent
   ],
   imports: [
     BrowserModule,
