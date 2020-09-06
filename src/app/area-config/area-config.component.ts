@@ -24,10 +24,10 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   /* エリア表示データ */
   public areaRect = [
-    { x: 0, y: 0, width: this.w / 2, height: this.h / 2, color: 'rgba(255,0,0,0.2)' },   // エリア１
-    { x: this.w / 2, y: 0, width: this.w / 2, height: this.h / 2, color: 'rgba(0,255,0,0.2)' },   // エリア２
-    { x: 0, y: this.h / 2, width: this.w / 2, height: this.h / 2, color: 'rgba(255,255,0,0.2)' }, // エリア３
-    { x: this.w / 2, y: this.h / 2, width: this.w / 2, height: this.h / 2, color: 'rgba(0,0,255,0.2)' }    // エリア４
+    { x: 0, y: 0, w: this.w / 2, h: this.h / 2, color: 'rgba(255,0,0,0.2)' },   // エリア１
+    { x: this.w / 2, y: 0, w: this.w / 2, h: this.h / 2, color: 'rgba(0,255,0,0.2)' },   // エリア２
+    { x: 0, y: this.h / 2, w: this.w / 2, h: this.h / 2, color: 'rgba(255,255,0,0.2)' }, // エリア３
+    { x: this.w / 2, y: this.h / 2, w: this.w / 2, h: this.h / 2, color: 'rgba(0,0,255,0.2)' }    // エリア４
   ];
 
   public areaLine = [
@@ -38,14 +38,14 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   ];
 
   public blankLine = [
-    { x1: 0, y1: 0, x2: 0, y2: this.h / 2, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 縦左上
-    { x1: 0, y1: this.h / 2, x2: 0, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 縦左下
-    { x1: this.w, y1: 0, x2: this.w, y2: this.h / 2, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 縦左下
-    { x1: this.w, y1: this.h / 2, x2: this.w, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 縦右下
-    { x1: 0, y1: 0, x2: this.w / 2, y2: 0, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 横左上
-    { x1: 0, y1: this.h, x2: this.w / 2, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 横左下
-    { x1: this.w / 2, y1: 0, x2: this.w, y2: 0, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 横右上
-    { x1: this.w / 2, y1: this.h, x2: this.w, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }  // 横右下
+    { x1: 0, y1: 0, x2: 0, y2: this.h / 2, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 0:縦左上
+    { x1: 0, y1: this.h / 2, x2: 0, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 1:縦左下
+    { x1: this.w, y1: 0, x2: this.w, y2: this.h / 2, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 2:縦左下
+    { x1: this.w, y1: this.h / 2, x2: this.w, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 3:縦右下
+    { x1: 0, y1: 0, x2: this.w / 2, y2: 0, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 4:横左上
+    { x1: 0, y1: this.h, x2: this.w / 2, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 5:横左下
+    { x1: this.w / 2, y1: 0, x2: this.w, y2: 0, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }, // 6:横右上
+    { x1: this.w / 2, y1: this.h, x2: this.w, y2: this.h, ox: 0 , oy: 0, isMove: false , color: 'rgba(128,128,128,1)' }  // 7:横右下
   ];
 
 
@@ -75,7 +75,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       // エリア描画
       for (const r of this.areaRect) {
         ctx.fillStyle = r.color;
-        ctx.fillRect(r.x, r.y, r.width, r.height);
+        ctx.fillRect(r.x, r.y, r.w, r.h);
       }
 
       // ブランクエリア選択ライン描画
@@ -112,24 +112,100 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const x = touchX - rect.left;
     const y = touchY - rect.top;
 
-
-
     for (const l of this.areaLine) {
       if ( l.isMove === true ) {
         if (l.x1 === l.x2) {   // 縦線
           l.ox = x - l.x1;
-        } else {              // 横線
+          console.log(l.ox);
+          if ((-this.w / 2) > l.ox ) {
+            l.ox = -this.w / 2;
+          } else if ( l.ox > (this.w / 2) ) {
+            l.ox = this.w / 2;
+          }
 
+          if (this.isXline === true ) {
+            this.areaLine[0].ox = l.ox;
+            this.areaLine[1].ox = l.ox;
+            this.areaLine[2].x2 = (this.w / 2) + l.ox;
+            this.areaLine[3].x1 = (this.w / 2) + l.ox;
+          }
+        } else {              // 横線
+          l.oy = y - l.y1;
+          if ((-this.h / 2) > l.oy ) {
+            l.oy = -this.h / 2;
+          } else if ( l.oy > (this.h / 2) ) {
+            l.oy = this.h / 2;
+          }
+          if (this.isYline === true ) {
+            this.areaLine[0].y2 = (this.h / 2) + l.oy;
+            this.areaLine[1].y1 = (this.h / 2) + l.oy;
+            this.areaLine[2].oy = l.oy;
+            this.areaLine[3].oy = l.oy;
+          }
+        }
+        this.ariaNum4RectArea(this.areaLine[2].oy, this.areaLine[3].oy , this.areaLine[0].ox , this.areaLine[1].ox);
+        console.log('X:', x + ' Y:', y);
+      }
+    }
+
+    for (const l of this.blankLine) {
+      if ( l.isMove === true ) {
+        if (l.x1 === l.x2) {   // 縦線
+          l.ox = x - l.x1;
+          console.log(l.ox);
+          if ((-this.w / 2) > l.ox ) {
+            l.ox = -this.w / 2;
+          } else if ( l.ox > (this.w / 2) ) {
+            l.ox = this.w / 2;
+          }
+          // if (this.isXline === true ) {
+          //   this.areaLine[0].ox = l.ox;
+          //   this.areaLine[1].ox = l.ox;
+          //   this.areaLine[2].x2 = (this.w / 2) + l.ox;
+          //   this.areaLine[3].x1 = (this.w / 2) + l.ox;
+          // }
+        } else {              // 横線
+          l.oy = y - l.y1;
+          if ((-this.h / 2) > l.oy ) {
+            l.oy = -this.h / 2;
+          } else if ( l.oy > (this.h / 2) ) {
+            l.oy = this.h / 2;
+          }
+          // if (this.isYline === true ) {
+          //   this.areaLine[0].y2 = (this.h / 2) + l.oy;
+          //   this.areaLine[1].y1 = (this.h / 2) + l.oy;
+          //   this.areaLine[2].oy = l.oy;
+          //   this.areaLine[3].oy = l.oy;
+          // }
         }
         console.log('X:', x + ' Y:', y);
       }
     }
+
     this.istapX = false;
     this.istapY = false;
     this.draw();
   }
 
 
+  public ariaNum4RectArea( xlY: any , xrY: any , yuX: any , ylX: any ) {
+    this.areaRect[0].x = 0;
+    this.areaRect[0].y = 0;
+    this.areaRect[0].w = (this.w / 2) + (yuX);
+    this.areaRect[0].h = (this.h / 2) + (xlY);
+    this.areaRect[1].x = (this.w / 2) + (yuX);
+    this.areaRect[1].y = 0;
+    this.areaRect[1].w = (this.w / 2) - (yuX);
+    this.areaRect[1].h = (this.h / 2) + (xrY);
+    this.areaRect[2].x = 0;
+    this.areaRect[2].y = (this.h / 2) + (xlY);
+    this.areaRect[2].w = (this.w / 2) + (ylX);
+    this.areaRect[2].h = (this.h / 2) - (xlY);
+    this.areaRect[3].x = (this.w / 2) + (ylX);
+    this.areaRect[3].y = (this.h / 2) + (xrY);
+    this.areaRect[3].w = (this.w / 2) - (ylX);
+    this.areaRect[3].h = (this.h / 2) - (xrY);
+  }
   public isXlineArea(line , x  , y) {
     if ((((line.x1 + line.ox - 5) < x) && (x < (line.x1 + line.xo + 5))) && (((line.y1 + line.oy) < y) && (y < (line.y2 + line.oy)))) {
       return true;
@@ -160,6 +236,23 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       } else {  // 横線
         if ((((l.y1 + l.oy - 5) < y) && (y < (l.y1 + l.oy + 5))) && ((l.x1 < x) && (x < l.x2))) {
           this.istapY = true;
+          l.isMove = true;
+          break;
+        }
+      }
+    }
+    for (const l of this.blankLine) {
+      // 縦線か横線かのチェック
+      if (l.x1 === l.x2) {   // 縦線
+        // console.log('tapx ' + 'X:', l.x1 + l.ox + ' Y:', y);
+        if ((((l.x1 + l.ox - 5) < x) && (x < (l.x1 + l.ox + 5))) && ((l.y1 < y) && (y < l.y2))) {
+          // this.istapX = true;
+          l.isMove = true;
+          break;
+        }
+      } else {  // 横線
+        if ((((l.y1 + l.oy - 5) < y) && (y < (l.y1 + l.oy + 5))) && ((l.x1 < x) && (x < l.x2))) {
+          // this.istapY = true;
           l.isMove = true;
           break;
         }
@@ -201,6 +294,9 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     this.istapX = false;
     this.istapY = false;
     for (const l of this.areaLine) {
+      l.isMove = false;
+    }
+    for (const l of this.blankLine) {
       l.isMove = false;
     }
     this.draw();
@@ -294,8 +390,6 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-
   handleEvent(event) {
     switch (event.type) {
       case 'touchstart':
@@ -313,51 +407,18 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
     const canvas = this.myCanvas.nativeElement;
-    // canvas.addEventListener('touchstart', this.touchStart.bind(this) , false );
-    // canvas.addEventListener('touchend',   this.touchEnd.bind(this) , false );
-    // canvas.addEventListener('touchmove',  this.touchMove , false );
-
     canvas.addEventListener('touchstart', this, false);
     canvas.addEventListener('touchend', this, false);
     canvas.addEventListener('touchmove', this, false);
-
     this.draw();
-
-    console.log(this);
 
     // const c = this.canvas.getElementById('stage');
     // console.log(this.can);
-
     // if (this.myCanvas.nativeElement.getContext) {
-
     //   const img01 = new Image();
-    //   console.log(img01);
     //   //img01.src = 'assets/img/cat.jpg';
-
-    //   const canvas = this.myCanvas.nativeElement;
-    //   const ctx = canvas.getContext('2d');
-
-    //   // this.areaRect[0].x = 200;
-
-    //   console.log(this.areaRect);
-
-
-    //   // ctx.addEventListener('click', (e) => {
-    //   //   const target = e.target as HTMLElement;    // <-- ココ！
-    //   //   console.log(target.innerText);
-    //   // });
-
-    //   // ctx.addEventListener("load", () => alert("ウィンドウのロードが完了しました。"));
-    //   // ctx.addEventListener("click", () => alert("clickされました。"));
-
-    //   // ctx.addEventListener('click', this.onClick, false);
-
-    //   // canvas.addEventListener('click', this.onClick , false );
     //   // img01.onload = () => {
-
-
     //     ctx.drawImage(img01, 0, 0 , 300 , 200 );
-
     //     ctx.fillStyle = 'rgba(255,0,0,0.2)';
     //     ctx.fillRect( 0 , 0, 150, 100);
     //     ctx.fillStyle = 'rgba(0,256,0,0.2)';
@@ -366,45 +427,6 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     //     ctx.fillRect( 0 , 100, 150, 100);
     //     ctx.fillStyle = 'rgba(0,0,255,0.2)';
     //     ctx.fillRect( 150 , 100, 150, 100);
-
-    //     ctx.lineWidth = 10;
-    //     ctx.beginPath();
-    //     ctx.moveTo(150, 0);
-    //     ctx.lineTo(150, 100);
-    //     ctx.closePath();
-    //     ctx.stroke();
-
-    //     ctx.beginPath();
-    //     ctx.moveTo(150, 100);
-    //     ctx.lineTo(150, 200);
-    //     ctx.closePath();
-    //     ctx.stroke();
-
-    //     ctx.beginPath();
-    //     ctx.moveTo(0 , 100);
-    //     ctx.lineTo(150, 100);
-    //     ctx.closePath();
-    //     ctx.stroke();
-
-    //     ctx.beginPath();
-    //     ctx.moveTo(150, 100);
-    //     ctx.lineTo(300, 100);
-    //     ctx.closePath();
-    //     ctx.stroke();
-
-
     // };
-
-
-
-    //console.log(ctx);
-
-
-    // ctx.fillStyle = 'rgba(0,0,0,0.5)';
-    // ctx.clearRect(60, 60, 120, 120);
-    // ctx.strokeRect(90, 90, 80, 80);
-
-    // console.log(aaa);
-    //}
   }
 }
