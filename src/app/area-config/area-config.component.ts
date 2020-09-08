@@ -20,7 +20,6 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   public istapX = false;
   public istapY = false;
-
   private isXline = true;
   private isYline = true;
 
@@ -133,19 +132,19 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
     l.ox = Math.round(l.ox / 10) * 10;
 
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[1].ox = l.ox;
         break;
       case 2:
-        if ( this.rotation === 0) {
+        if (this.rotation === 0) {
           this.areaLine[1].ox = l.ox;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
-        } else if ( this.rotation === 1) {
-        } else if ( this.rotation === 2) {
+        if (this.rotation === 0) {
+        } else if (this.rotation === 1) {
+        } else if (this.rotation === 2) {
         } else {
           this.areaLine[1].ox = l.ox;
         }
@@ -168,19 +167,19 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.ox = w1;
     }
     l.ox = Math.round(l.ox / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[0].ox = l.ox;
         break;
       case 2:
-        if ( this.rotation === 0) {
+        if (this.rotation === 0) {
           this.areaLine[0].ox = l.ox;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
-        } else if ( this.rotation === 1) {
-        } else if ( this.rotation === 2) {
+        if (this.rotation === 0) {
+        } else if (this.rotation === 1) {
+        } else if (this.rotation === 2) {
         } else {
           this.areaLine[0].ox = l.ox;
         }
@@ -201,20 +200,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.ox = -w1;
     }
     l.ox = Math.round(l.ox / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[3].ox = l.ox;
         break;
       case 2:
-        if ( this.rotation === 0) {
+        if (this.rotation === 0) {
           this.areaLine[3].ox = l.ox;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
-        } else if ( this.rotation === 1) {
+        if (this.rotation === 0) {
+        } else if (this.rotation === 1) {
           this.areaLine[3].ox = l.ox;
-        } else if ( this.rotation === 2) {
+        } else if (this.rotation === 2) {
         } else {
         }
         break;
@@ -234,20 +233,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.ox = -w1;
     }
     l.ox = Math.round(l.ox / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[2].ox = l.ox;
         break;
       case 2:
-        if ( this.rotation === 0) {
+        if (this.rotation === 0) {
           this.areaLine[2].ox = l.ox;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
-        } else if ( this.rotation === 1) {
+        if (this.rotation === 0) {
+        } else if (this.rotation === 1) {
           this.areaLine[2].ox = l.ox;
-        } else if ( this.rotation === 2) {
+        } else if (this.rotation === 2) {
         } else {
         }
         break;
@@ -313,20 +312,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.oy = h1;
     }
     l.oy = Math.round(l.oy / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[6].oy = l.oy;
         break;
       case 2:
-        if ( this.rotation === 1) {
+        if (this.rotation === 1) {
           this.areaLine[6].oy = l.oy;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
+        if (this.rotation === 0) {
           this.areaLine[6].oy = l.oy;
-        } else if ( this.rotation === 1) {
-        } else if ( this.rotation === 2) {
+        } else if (this.rotation === 1) {
+        } else if (this.rotation === 2) {
         } else {
         }
         break;
@@ -346,19 +345,19 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.oy = -h1;
     }
     l.oy = Math.round(l.oy / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[7].oy = l.oy;
         break;
       case 2:
-        if ( this.rotation === 1) {
+        if (this.rotation === 1) {
           this.areaLine[7].oy = l.oy;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
-        } else if ( this.rotation === 1) {
-        } else if ( this.rotation === 2) {
+        if (this.rotation === 0) {
+        } else if (this.rotation === 1) {
+        } else if (this.rotation === 2) {
           this.areaLine[7].oy = l.oy;
         } else {
         }
@@ -378,20 +377,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.oy = h1;
     }
     l.oy = Math.round(l.oy / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[4].oy = l.oy;
         break;
       case 2:
-        if ( this.rotation === 1) {
+        if (this.rotation === 1) {
           this.areaLine[4].oy = l.oy;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
+        if (this.rotation === 0) {
           this.areaLine[4].oy = l.oy;
-        } else if ( this.rotation === 1) {
-        } else if ( this.rotation === 2) {
+        } else if (this.rotation === 1) {
+        } else if (this.rotation === 2) {
         } else {
         }
         break;
@@ -410,19 +409,19 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       l.oy = -h1;
     }
     l.oy = Math.round(l.oy / 10) * 10;
-    switch ( this.areaNum ) {
+    switch (this.areaNum) {
       case 1:
         this.areaLine[5].oy = l.oy;
         break;
       case 2:
-        if ( this.rotation === 1) {
+        if (this.rotation === 1) {
           this.areaLine[5].oy = l.oy;
         }
         break;
       case 3:
-        if ( this.rotation === 0) {
-        } else if ( this.rotation === 1) {
-        } else if ( this.rotation === 2) {
+        if (this.rotation === 0) {
+        } else if (this.rotation === 1) {
+        } else if (this.rotation === 2) {
           this.areaLine[5].oy = l.oy;
         } else {
         }
@@ -510,7 +509,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
         if (l.x1 === l.x2) {   // 縦線
           // console.log('tapx ' + 'X:', l.x1 + l.ox + ' Y:', y);
           if ((((l.x1 + l.ox - 10) < x) && (x < (l.x1 + l.ox + 10))) && ((l.y1 < y) && (y < l.y2))) {
-            if ( (l.name === '8') ||  (l.name === '9') ) {
+            if ((l.name === '8') || (l.name === '9')) {
               this.istapX = true;
             }
             l.isMove = true;
@@ -518,7 +517,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           }
         } else {  // 横線
           if ((((l.y1 + l.oy - 10) < y) && (y < (l.y1 + l.oy + 10))) && ((l.x1 < x) && (x < l.x2))) {
-            if ( (l.name === '10') || (l.name === '11') ) {
+            if ((l.name === '10') || (l.name === '11')) {
               this.istapY = true;
             }
             l.isMove = true;
@@ -648,7 +647,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
     }
     for (const l of this.areaLine) {
-      switch( l.name ) {
+      switch (l.name) {
         case '8':
         case '9':
         case '10':
@@ -744,7 +743,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       // this.ta3.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
     }
     for (const l of this.areaLine) {
-      switch( l.name ) {
+      switch (l.name) {
         case '8':
         case '9':
         case '10':
@@ -812,6 +811,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const ylX = this.areaLine[9].ox;
 
     if (this.areaNum === 1) {
+      this.ariaNum1RectArea(xlY, xrY, yuX, ylX);
     } else if (this.areaNum === 2) {
       this.ariaNum2RectArea(xlY, xrY, yuX, ylX);
     } else if (this.areaNum === 3) {
@@ -821,18 +821,39 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
   }
 
+  public ariaNum1RectArea(xlY: any, xrY: any, yuX: any, ylX: any) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    const yluX = this.areaLine[0].ox;
+    const yllX = this.areaLine[1].ox;
+    const yruX = this.areaLine[2].ox;
+    const yrlX = this.areaLine[3].ox;
+
+    const xruY = this.areaLine[4].oy;
+    const xrlY = this.areaLine[5].oy;
+    const xluY = this.areaLine[6].oy;
+    const xllY = this.areaLine[7].oy;
+
+    this.setAreaRect(0, w0 + yluX , h0 + xruY , w1 - yluX + yruX, h1 - xruY + xrlY);
+  }
 
   public ariaNum2RectArea(xlY: any, xrY: any, yuX: any, ylX: any) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
 
-    const w0 = 0;
-    const h0 = 0;
-    const w1 = this.w;
-    const w2 = this.w / 2;
-    const h1 = this.h;
-    const h2 = this.h / 2;
+    const yluX = this.areaLine[0].ox;
+    const yllX = this.areaLine[1].ox;
+    const yruX = this.areaLine[2].ox;
+    const yrlX = this.areaLine[3].ox;
+
+    const xruY = this.areaLine[4].oy;
+    const xrlY = this.areaLine[5].oy;
+    const xluY = this.areaLine[6].oy;
+    const xllY = this.areaLine[7].oy;
 
     if (this.rotation === 0) {
-      this.setAreaRect(0, w0, h0, w2 + yuX, h1);
+      this.setAreaRect(0, w0 , h0, w2 + yuX, h1);
       this.setAreaRect(1, w2 + yuX, h0, w2 - yuX, h1);
     } else {
       this.setAreaRect(0, w0, h0, w1, h2 + xlY);
@@ -840,13 +861,18 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
   }
   public ariaNum3RectArea(xlY: any, xrY: any, yuX: any, ylX: any) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
 
-    const w0 = 0;
-    const h0 = 0;
-    const w1 = this.w;
-    const w2 = this.w / 2;
-    const h1 = this.h;
-    const h2 = this.h / 2;
+    const yluX = this.areaLine[0].ox;
+    const yllX = this.areaLine[1].ox;
+    const yruX = this.areaLine[2].ox;
+    const yrlX = this.areaLine[3].ox;
+
+    const xruY = this.areaLine[4].oy;
+    const xrlY = this.areaLine[5].oy;
+    const xluY = this.areaLine[6].oy;
+    const xllY = this.areaLine[7].oy;
 
     if (this.rotation === 0) {
       this.setAreaRect(0, w0, h0, w1, h2 + xlY);
@@ -867,6 +893,8 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
   }
   public ariaNum4RectArea(xlY: any, xrY: any, yuX: any, ylX: any) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
 
     const yluX = this.areaLine[0].ox;
     const yllX = this.areaLine[1].ox;
@@ -878,10 +906,10 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const xluY = this.areaLine[6].oy;
     const xllY = this.areaLine[7].oy;
 
-    this.setAreaRect(0, 0 + (yluX), 0 + (xruY), (this.w / 2) + (yuX) - (yluX), (this.h / 2) + (xlY) - (xruY));
-    this.setAreaRect(1, (this.w / 2) + (yuX), 0 + (xluY), (this.w / 2) - (yuX) + (yruX), (this.h / 2) + (xrY) - (xluY));
-    this.setAreaRect(2, 0 + (yllX), (this.h / 2) + (xlY), (this.w / 2) + (ylX) - (yllX), (this.h / 2) - (xlY) + (xrlY));
-    this.setAreaRect(3, (this.w / 2) + (ylX), (this.h / 2) + (xrY), (this.w / 2) - (ylX) + (yrlX), (this.h / 2) - (xrY) + (xllY));
+    this.setAreaRect(0, w0 + (yluX), h0 + (xruY), (w2) + (yuX) - (yluX), (h2) + (xlY) - (xruY));
+    this.setAreaRect(1, (w2) + (yuX), h0 + (xluY), (w2) - (yuX) + (yruX), (h2) + (xrY) - (xluY));
+    this.setAreaRect(2, w0 + (yllX), (h2) + (xlY), (w2) + (ylX) - (yllX), (h2) - (xlY) + (xrlY));
+    this.setAreaRect(3, (w2) + (ylX), (h2) + (xrY), (w2) - (ylX) + (yrlX), (h2) - (xrY) + (xllY));
   }
 
   ngAfterViewInit() {
