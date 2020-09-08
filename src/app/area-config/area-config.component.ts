@@ -34,6 +34,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     // console.log(this);
   }
 
+
   public draw() {
     const canvas = this.myCanvas.nativeElement;
     if (canvas.getContext) {
@@ -72,6 +73,365 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // 縦上
+  public yuMove(l, x) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.ox = x - l.x1;
+    if ((-w2) > l.ox) {
+      l.ox = -w2;
+    } else if (l.ox > (w2)) {
+      l.ox = w2;
+    }
+    l.ox = Math.round(l.ox / 10) * 10;
+    if (this.isXline === true) {
+      this.areaLine[8].ox = l.ox;
+      this.areaLine[9].ox = l.ox;
+      this.areaLine[10].x2 = (w2) + l.ox;
+      this.areaLine[11].x1 = (w2) + l.ox;
+      this.areaLine[5].x2 = (w2) + l.ox;
+      this.areaLine[7].x1 = (w2) + l.ox;
+    }
+    this.areaLine[4].x2 = (w2) + l.ox;
+    this.areaLine[6].x1 = (w2) + l.ox;
+  }
+  // 縦下
+  public ylMove(l, x) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.ox = x - l.x1;
+    if ((-this.w / 2) > l.ox) {
+      l.ox = -this.w / 2;
+    } else if (l.ox > (this.w / 2)) {
+      l.ox = this.w / 2;
+    }
+    l.ox = Math.round(l.ox / 10) * 10;
+    if (this.isXline === true) {
+      this.areaLine[8].ox = l.ox;
+      this.areaLine[9].ox = l.ox;
+      this.areaLine[10].x2 = (w2) + l.ox;
+      this.areaLine[11].x1 = (w2) + l.ox;
+      this.areaLine[4].x2 = (w2) + l.ox;
+      this.areaLine[6].x1 = (w2) + l.ox;
+    }
+    this.areaLine[5].x2 = (w2) + l.ox;
+    this.areaLine[7].x1 = (w2) + l.ox;
+  }
+
+  // 縦左上
+  public yluMove(l, x) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.ox = x - l.x1;
+    if ((w0) > l.ox) {
+      l.ox = w0;
+    } else if (l.ox > w1) {
+      l.ox = w1;
+    }
+    l.ox = Math.round(l.ox / 10) * 10;
+
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[1].ox = l.ox;
+        break;
+      case 2:
+        if ( this.rotation === 0) {
+          this.areaLine[1].ox = l.ox;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+        } else if ( this.rotation === 1) {
+        } else if ( this.rotation === 2) {
+        } else {
+          this.areaLine[1].ox = l.ox;
+        }
+        break;
+      case 4:
+        break;
+    }
+
+  }
+
+  // 縦左上
+  public yllMove(l, x) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.ox = x - l.x1;
+    if ((w0) > l.ox) {
+      l.ox = w0;
+    } else if (l.ox > w1) {
+      l.ox = w1;
+    }
+    l.ox = Math.round(l.ox / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[0].ox = l.ox;
+        break;
+      case 2:
+        if ( this.rotation === 0) {
+          this.areaLine[0].ox = l.ox;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+        } else if ( this.rotation === 1) {
+        } else if ( this.rotation === 2) {
+        } else {
+          this.areaLine[0].ox = l.ox;
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+
+  public yruMove(l, x) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.ox = x - l.x1;
+    if ((w0) < l.ox) {
+      l.ox = w0;
+    } else if (l.ox < -w1) {
+      l.ox = -w1;
+    }
+    l.ox = Math.round(l.ox / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[3].ox = l.ox;
+        break;
+      case 2:
+        if ( this.rotation === 0) {
+          this.areaLine[3].ox = l.ox;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+        } else if ( this.rotation === 1) {
+          this.areaLine[3].ox = l.ox;
+        } else if ( this.rotation === 2) {
+        } else {
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+
+  public yrlMove(l, x) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.ox = x - l.x1;
+    if ((w0) < l.ox) {
+      l.ox = w0;
+    } else if (l.ox < -w1) {
+      l.ox = -w1;
+    }
+    l.ox = Math.round(l.ox / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[2].ox = l.ox;
+        break;
+      case 2:
+        if ( this.rotation === 0) {
+          this.areaLine[2].ox = l.ox;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+        } else if ( this.rotation === 1) {
+          this.areaLine[2].ox = l.ox;
+        } else if ( this.rotation === 2) {
+        } else {
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+
+  public xlMove(l, y) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.oy = y - l.y1;
+    if ((-this.h / 2) > l.oy) {
+      l.oy = -this.h / 2;
+    } else if (l.oy > (this.h / 2)) {
+      l.oy = this.h / 2;
+    }
+    if (this.isYline === true) {
+      l.oy = Math.round(l.oy / 10) * 10;
+      this.areaLine[8].y2 = (this.h / 2) + l.oy;
+      this.areaLine[9].y1 = (this.h / 2) + l.oy;
+      this.areaLine[10].oy = l.oy;
+      this.areaLine[11].oy = l.oy;
+      this.areaLine[2].y2 = (this.h / 2) + l.oy;
+      this.areaLine[3].y1 = (this.h / 2) + l.oy;
+    }
+    this.areaLine[0].y2 = (this.h / 2) + l.oy;
+    this.areaLine[1].y1 = (this.h / 2) + l.oy;
+  }
+
+  public xrMove(l, y) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.oy = y - l.y1;
+    if ((-this.h / 2) > l.oy) {
+      l.oy = -this.h / 2;
+    } else if (l.oy > (this.h / 2)) {
+      l.oy = this.h / 2;
+    }
+    l.oy = Math.round(l.oy / 10) * 10;
+    if (this.isYline === true) {
+      this.areaLine[8].y2 = (this.h / 2) + l.oy;
+      this.areaLine[9].y1 = (this.h / 2) + l.oy;
+      this.areaLine[10].oy = l.oy;
+      this.areaLine[11].oy = l.oy;
+      this.areaLine[0].y2 = (this.h / 2) + l.oy;
+      this.areaLine[1].y1 = (this.h / 2) + l.oy;
+    }
+    this.areaLine[2].y2 = (this.h / 2) + l.oy;
+    this.areaLine[3].y1 = (this.h / 2) + l.oy;
+  }
+
+  public xluMove(l, y) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.oy = y - l.y1;
+    if (h0 > l.oy) {
+      l.oy = h0;
+    } else if (l.oy > h1) {
+      l.oy = h1;
+    }
+    l.oy = Math.round(l.oy / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[6].oy = l.oy;
+        break;
+      case 2:
+        if ( this.rotation === 1) {
+          this.areaLine[6].oy = l.oy;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+          this.areaLine[6].oy = l.oy;
+        } else if ( this.rotation === 1) {
+        } else if ( this.rotation === 2) {
+        } else {
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+
+  public xllMove(l, y) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.oy = y - l.y1;
+    if (h0 < l.oy) {
+      l.oy = h0;
+    } else if (l.oy < -h1) {
+      l.oy = -h1;
+    }
+    l.oy = Math.round(l.oy / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[7].oy = l.oy;
+        break;
+      case 2:
+        if ( this.rotation === 1) {
+          this.areaLine[7].oy = l.oy;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+        } else if ( this.rotation === 1) {
+        } else if ( this.rotation === 2) {
+          this.areaLine[7].oy = l.oy;
+        } else {
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+  public xruMove(l, y) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.oy = y - l.y1;
+    if (h0 > l.oy) {
+      l.oy = h0;
+    } else if (l.oy > h1) {
+      l.oy = h1;
+    }
+    l.oy = Math.round(l.oy / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[4].oy = l.oy;
+        break;
+      case 2:
+        if ( this.rotation === 1) {
+          this.areaLine[4].oy = l.oy;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+          this.areaLine[4].oy = l.oy;
+        } else if ( this.rotation === 1) {
+        } else if ( this.rotation === 2) {
+        } else {
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+  public xrlMove(l, y) {
+    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
+    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+
+    l.oy = y - l.y1;
+    if (h0 < l.oy) {
+      l.oy = h0;
+    } else if (l.oy < -h1) {
+      l.oy = -h1;
+    }
+    l.oy = Math.round(l.oy / 10) * 10;
+    switch ( this.areaNum ) {
+      case 1:
+        this.areaLine[5].oy = l.oy;
+        break;
+      case 2:
+        if ( this.rotation === 1) {
+          this.areaLine[5].oy = l.oy;
+        }
+        break;
+      case 3:
+        if ( this.rotation === 0) {
+        } else if ( this.rotation === 1) {
+        } else if ( this.rotation === 2) {
+          this.areaLine[5].oy = l.oy;
+        } else {
+        }
+        break;
+      case 4:
+        break;
+    }
+  }
+
   public touchMove(event) {
     event.preventDefault();
     const rect = event.target.getBoundingClientRect();
@@ -81,170 +441,50 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const x = touchX - rect.left;
     const y = touchY - rect.top;
 
-    const w0 = 0;
-    const h0 = 0;
-    const w1 = this.w;
-    const w2 = this.w / 2;
-    const h1 = this.h;
-    const h2 = this.h / 2;
-
     for (const l of this.areaLine) {
       if (l.isMove === true && l.ishide === false) {
         if (l.x1 === l.x2) {   // 縦線
           switch (l.name) {
             case '8': // 縦上
-              l.ox = x - l.x1;
-              if ((-w2) > l.ox) {
-                l.ox = -w2;
-              } else if (l.ox > (w2)) {
-                l.ox = w2;
-              }
-              l.ox = Math.round(l.ox / 10) * 10;
-              if (this.isXline === true) {
-                this.areaLine[8].ox = l.ox;
-                this.areaLine[9].ox = l.ox;
-                this.areaLine[10].x2 = (w2) + l.ox;
-                this.areaLine[11].x1 = (w2) + l.ox;
-                this.areaLine[5].x2 = (w2) + l.ox;
-                this.areaLine[7].x1 = (w2) + l.ox;
-              }
-              this.areaLine[4].x2 = (w2) + l.ox;
-              this.areaLine[6].x1 = (w2) + l.ox;
+              this.yuMove(l, x);
               break;
             case '9': // 縦下
-              l.ox = x - l.x1;
-              if ((-this.w / 2) > l.ox) {
-                l.ox = -this.w / 2;
-              } else if (l.ox > (this.w / 2)) {
-                l.ox = this.w / 2;
-              }
-              l.ox = Math.round(l.ox / 10) * 10;
-              if (this.isXline === true) {
-                this.areaLine[8].ox = l.ox;
-                this.areaLine[9].ox = l.ox;
-                this.areaLine[10].x2 = (w2) + l.ox;
-                this.areaLine[11].x1 = (w2) + l.ox;
-                this.areaLine[4].x2 = (w2) + l.ox;
-                this.areaLine[6].x1 = (w2) + l.ox;
-              }
-              this.areaLine[5].x2 = (w2) + l.ox;
-              this.areaLine[7].x1 = (w2) + l.ox;
+              this.ylMove(l, x);
               break;
             case '0': // 0:縦左上
-              l.ox = x - l.x1;
-              if ((w0) > l.ox) {
-                l.ox = w0;
-              } else if (l.ox > w1) {
-                l.ox = w1;
-              }
-              l.ox = Math.round(l.ox / 10) * 10;
+              this.yluMove(l, x);
               break;
             case '1': // 1:縦左下
-              l.ox = x - l.x1;
-              if ((w0) > l.ox) {
-                l.ox = w0;
-              } else if (l.ox > w1) {
-                l.ox = w1;
-              }
-              l.ox = Math.round(l.ox / 10) * 10;
+              this.yllMove(l, x);
               break;
             case '2': // 2:縦右上
-              l.ox = x - l.x1;
-              if ((w0) < l.ox) {
-                l.ox = w0;
-              } else if (l.ox < -w1) {
-                l.ox = -w1;
-              }
-              l.ox = Math.round(l.ox / 10) * 10;
+              this.yruMove(l, x);
               break;
             case '3': // 3:縦右下
-              l.ox = x - l.x1;
-              if ((w0) < l.ox) {
-                l.ox = w0;
-              } else if (l.ox < -w1) {
-                l.ox = -w1;
-              }
-              l.ox = Math.round(l.ox / 10) * 10;
+              this.yrlMove(l, x);
               break;
           }
         } else {              // 横線
           switch (l.name) {
-            case '10':  // 横右
-              if (this.isYline === true) {
-                l.oy = y - l.y1;
-                if ((-this.h / 2) > l.oy) {
-                  l.oy = -this.h / 2;
-                } else if (l.oy > (this.h / 2)) {
-                  l.oy = this.h / 2;
-                }
-                l.oy = Math.round(l.oy / 10) * 10;
-                this.areaLine[8].y2 = (this.h / 2) + l.oy;
-                this.areaLine[9].y1 = (this.h / 2) + l.oy;
-                this.areaLine[10].oy = l.oy;
-                this.areaLine[11].oy = l.oy;
-                this.areaLine[2].y2 = (this.h / 2) + l.oy;
-                this.areaLine[3].y1 = (this.h / 2) + l.oy;
-              }
-              this.areaLine[0].y2 = (this.h / 2) + l.oy;
-              this.areaLine[1].y1 = (this.h / 2) + l.oy;
+            case '10':  // 横左
+              this.xlMove(l, y);
               break;
-            case '11':  // 横左
-              l.oy = y - l.y1;
-              if ((-this.h / 2) > l.oy) {
-                l.oy = -this.h / 2;
-              } else if (l.oy > (this.h / 2)) {
-                l.oy = this.h / 2;
-              }
-              l.oy = Math.round(l.oy / 10) * 10;
-              if (this.isYline === true) {
-                this.areaLine[8].y2 = (this.h / 2) + l.oy;
-                this.areaLine[9].y1 = (this.h / 2) + l.oy;
-                this.areaLine[10].oy = l.oy;
-                this.areaLine[11].oy = l.oy;
-                this.areaLine[0].y2 = (this.h / 2) + l.oy;
-                this.areaLine[1].y1 = (this.h / 2) + l.oy;
-              }
-              this.areaLine[2].y2 = (this.h / 2) + l.oy;
-              this.areaLine[3].y1 = (this.h / 2) + l.oy;
+            case '11':  // 横右
+              this.xrMove(l, y);
               break;
             case '4': // 4:横左上
-              l.oy = y - l.y1;
-              if (h0 > l.oy) {
-                l.oy = h0;
-              } else if (l.oy > h1) {
-                l.oy = h1;
-              }
-              l.oy = Math.round(l.oy / 10) * 10;
+              this.xluMove(l, y);
               break;
             case '5': // 5:横左下
-              l.oy = y - l.y1;
-              if (h0 < l.oy) {
-                l.oy = h0;
-              } else if (l.oy < -h1) {
-                l.oy = -h1;
-              }
-              l.oy = Math.round(l.oy / 10) * 10;
+              this.xllMove(l, y);
               break;
             case '6': // 6:横右上
-              l.oy = y - l.y1;
-              if (h0 > l.oy) {
-                l.oy = h0;
-              } else if (l.oy > h1) {
-                l.oy = h1;
-              }
-              l.oy = Math.round(l.oy / 10) * 10;
+              this.xruMove(l, y);
               break;
             case '7': // 7:横右下
-              l.oy = y - l.y1;
-              if (h0 < l.oy) {
-                l.oy = h0;
-              } else if (l.oy < -h1) {
-                l.oy = -h1;
-              }
-              l.oy = Math.round(l.oy / 10) * 10;
+              this.xrlMove(l, y);
               break;
           }
-
         }
         this.rectArea();
         // console.log('X:', x + ' Y:', y);
@@ -270,13 +510,17 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
         if (l.x1 === l.x2) {   // 縦線
           // console.log('tapx ' + 'X:', l.x1 + l.ox + ' Y:', y);
           if ((((l.x1 + l.ox - 10) < x) && (x < (l.x1 + l.ox + 10))) && ((l.y1 < y) && (y < l.y2))) {
-            this.istapX = true;
+            if ( (l.name === '8') ||  (l.name === '9') ) {
+              this.istapX = true;
+            }
             l.isMove = true;
             break;
           }
         } else {  // 横線
           if ((((l.y1 + l.oy - 10) < y) && (y < (l.y1 + l.oy + 10))) && ((l.x1 < x) && (x < l.x2))) {
-            this.istapY = true;
+            if ( (l.name === '10') || (l.name === '11') ) {
+              this.istapY = true;
+            }
             l.isMove = true;
             break;
           }
@@ -403,6 +647,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
       // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
     }
+    for (const l of this.areaLine) {
+      switch( l.name ) {
+        case '8':
+        case '9':
+        case '10':
+        case '11':
+          break;
+        default:
+          l.ox = 0;
+          l.oy = 0;
+          break;
+      }
+    }
+    this.rectArea();
   }
 
   // エリア数 3 のタップ処理
@@ -485,6 +743,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
       // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
       // this.ta3.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
     }
+    for (const l of this.areaLine) {
+      switch( l.name ) {
+        case '8':
+        case '9':
+        case '10':
+        case '11':
+          break;
+        default:
+          l.ox = 0;
+          l.oy = 0;
+          break;
+      }
+    }
+    this.rectArea();
   }
 
   // エリア数 4 の横ライン(X)タップ処理
@@ -578,20 +850,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
     if (this.rotation === 0) {
       this.setAreaRect(0, w0, h0, w1, h2 + xlY);
-      this.setAreaRect(1, w0, h2 + xlY, w2 + (ylX) , h2 - xlY);
+      this.setAreaRect(1, w0, h2 + xlY, w2 + (ylX), h2 - xlY);
       this.setAreaRect(2, w2 + ylX, h2 + xrY, w2 - ylX, h2 - xrY);
     } else if (this.rotation === 1) {
       this.setAreaRect(0, w0, h0, w2 + yuX, h2 + xlY);
-      this.setAreaRect(1, w2 + yuX, h0 , w2 - (yuX) , h1);
-      this.setAreaRect(2, w0 , h2 + xlY, w2 + ylX, h2 - xlY);
+      this.setAreaRect(1, w2 + yuX, h0, w2 - (yuX), h1);
+      this.setAreaRect(2, w0, h2 + xlY, w2 + ylX, h2 - xlY);
     } else if (this.rotation === 2) {
       this.setAreaRect(0, w0, h0, w2 + (yuX), h2 + (xlY));
-      this.setAreaRect(1, w2 + (yuX), h0 , w2 - (yuX) , h2 + (xrY));
-      this.setAreaRect(2, w0 , h2 + (xlY), w1 , h2 - (xlY));
+      this.setAreaRect(1, w2 + (yuX), h0, w2 - (yuX), h2 + (xrY));
+      this.setAreaRect(2, w0, h2 + (xlY), w1, h2 - (xlY));
     } else {
       this.setAreaRect(0, w0, h0, w2 + (yuX), h1);
-      this.setAreaRect(1, w2 + (yuX), h0 , w2 - (yuX) , h2 + (xrY));
-      this.setAreaRect(2, w2  + (ylX) , h2 + (xlY), w2  - (ylX) , h2 - (xlY));
+      this.setAreaRect(1, w2 + (yuX), h0, w2 - (yuX), h2 + (xrY));
+      this.setAreaRect(2, w2 + (ylX), h2 + (xlY), w2 - (ylX), h2 - (xlY));
     }
   }
   public ariaNum4RectArea(xlY: any, xrY: any, yuX: any, ylX: any) {
