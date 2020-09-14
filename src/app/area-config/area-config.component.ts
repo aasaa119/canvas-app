@@ -13,7 +13,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   @Input() areaNum;
   @Input() isDrag = true;
 
-  public w = 0;   
+  public w = 0;
   public h = 0;
 
   public gridx = 40;
@@ -39,7 +39,6 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   }
 
-  
   public drawLine(ctx: any , x1: number , y1: number , x2: number , y2: number ) {
     ctx.beginPath();
     ctx.moveTo(x1, y1);
@@ -83,7 +82,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
             ctx.shadowOffsetX = 5;
             ctx.shadowOffsetY = 5;
           }
-          this.drawLine(ctx , l.x1 + l.ox + this.offsetX , l.y1 + l.oy + this.offsetY, 
+          this.drawLine(ctx , l.x1 + l.ox + this.offsetX , l.y1 + l.oy + this.offsetY,
             l.x2 + l.ox + this.offsetX , l.y2 + l.oy + this.offsetY);
           ctx.shadowBlur = 0;
           ctx.shadowOffsetX = 0;
@@ -93,7 +92,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     }
   }
 
-  public yLineOffsetX(l: { ox: number; x1: number; },x: number,min: number,max: number): number {
+  public yLineOffsetX(l: { ox: number; x1: number; }, x: number, min: number, max: number): number {
     l.ox = x - l.x1;
     if ( min > l.ox ) {
       l.ox = min;
@@ -107,7 +106,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   // 縦上
   public yuMove(l, x) {
     const w2 = this.w / 2;
-    const ox =  this.yLineOffsetX(l,x,-w2,w2);
+    const ox =  this.yLineOffsetX(l, x, -w2, w2);
     if (this.isXline === true) {
       this.areaLine[8].ox = ox;
       this.areaLine[10].x2 = (w2) + ox;
@@ -121,9 +120,8 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   // 縦下
   public ylMove(l, x) {
     const w2 = this.w / 2;
-    const ox =  this.yLineOffsetX(l,x,-w2,w2);
+    const ox =  this.yLineOffsetX(l, x, -w2, w2);
     if (this.isXline === true) {
-      // 
       this.areaLine[9].ox = ox;
       this.areaLine[10].x2 = (w2) + ox;
       this.areaLine[11].x1 = (w2) + ox;
@@ -134,57 +132,43 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     this.areaLine[7].x1 = (w2) + ox;
   }
 
+  public sameBlankLineY( line , num2R, num3R , ox) {
+    if ( this.areaNum === 1 ) {
+      this.areaLine[line].ox = ox;
+    } else if ((this.areaNum === 2) && (this.rotation === num2R )) {
+      this.areaLine[line].ox = ox;
+    } else if ((this.areaNum === 3) && (this.rotation === num3R )) {
+      this.areaLine[line].ox = ox;
+    }
+  }
+
   // 縦左上
   public yluMove(l, x) {
     const w0 = 0; const w1 = this.w;
-    const ox =  this.yLineOffsetX(l,x,-w0,w1);
-    if( this.areaNum === 1 ) {
-      this.areaLine[1].ox = ox;
-    } else if ((this.areaNum === 2) && (this.rotation === 0)) {
-      this.areaLine[1].ox = ox;
-    } else if ((this.areaNum === 3) && (this.rotation === 3)) {
-      this.areaLine[1].ox = ox;
-    }
+    const ox =  this.yLineOffsetX(l, x, -w0, w1);
+    this.sameBlankLineY( 1 , 0 , 3 , ox);
   }
 
   // 縦左上
   public yllMove(l, x) {
     const w0 = 0; const w1 = this.w;
-    const ox =  this.yLineOffsetX(l,x,w0,w1);
-    if( this.areaNum === 1 ) {
-      this.areaLine[0].ox = ox;
-    } else if ((this.areaNum === 2) && (this.rotation === 0)) {
-      this.areaLine[0].ox = ox;
-    } else if ((this.areaNum === 3) && (this.rotation === 3)) {
-      this.areaLine[0].ox = ox;
-    }
+    const ox =  this.yLineOffsetX(l, x, w0, w1);
+    this.sameBlankLineY( 0 , 0 , 3 , ox);
   }
 
   public yruMove(l, x) {
     const w0 = 0; const w1 = this.w;
-    const ox =  this.yLineOffsetX(l,x,-w1,w0);
-    if( this.areaNum === 1 ) {
-      this.areaLine[3].ox = ox;
-    } else if ((this.areaNum === 2) && (this.rotation === 0)) {
-      this.areaLine[3].ox = ox;
-    } else if ((this.areaNum === 3) && (this.rotation === 1)) {
-      this.areaLine[3].ox = ox;
-    }
+    const ox =  this.yLineOffsetX(l, x, -w1, w0);
+    this.sameBlankLineY( 3 , 0 , 1 , ox);
   }
 
   public yrlMove(l, x) {
     const w0 = 0; const w1 = this.w;
-    const ox =  this.yLineOffsetX(l,x,-w1,w0);
-    if( this.areaNum === 1 ) {
-      this.areaLine[2].ox = ox;
-    } else if ((this.areaNum === 2) && (this.rotation === 0)) {
-      this.areaLine[2].ox = ox;
-    } else if ((this.areaNum === 3) && (this.rotation === 1)) {
-      this.areaLine[2].ox = ox;
-    }
+    const ox =  this.yLineOffsetX(l, x, -w1, w0);
+    this.sameBlankLineY( 2 , 0 , 1 , ox);
   }
 
-  public xLineOffsetY(l: { oy: number; y1: number; },x: number,min: number,max: number): number {
+  public xLineOffsetY(l: { oy: number; y1: number; }, x: number, min: number, max: number): number {
     l.oy = x - l.y1;
     if ( min > l.oy ) {
       l.oy = min;
@@ -197,7 +181,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   public xlMove(l, y) {
     const h2 = this.h / 2;
-    const oy =  this.xLineOffsetY(l,y,-h2,h2);
+    const oy =  this.xLineOffsetY(l, y, -h2, h2);
     if (this.isYline === true) {
       this.areaLine[8].y2 = (h2) + oy;
       this.areaLine[9].y1 = (h2) + oy;
@@ -212,7 +196,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   public xrMove(l, y) {
     const h2 = this.h / 2;
-    const oy =  this.xLineOffsetY(l,y,-h2,h2);
+    const oy =  this.xLineOffsetY(l, y, -h2, h2);
     if (this.isYline === true) {
       this.areaLine[8].y2 = (h2) + oy;
       this.areaLine[9].y1 = (h2) + oy;
@@ -225,50 +209,37 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     this.areaLine[3].y1 = (h2) + oy;
   }
 
+
+  public sameBlankLineX( line , num2R, num3R , oy) {
+    if ( this.areaNum === 1 ) {
+      this.areaLine[line].oy = oy;
+    } else if ((this.areaNum === 2) && (this.rotation === num2R )) {
+      this.areaLine[line].oy = oy;
+    } else if ((this.areaNum === 3) && (this.rotation === num3R )) {
+      this.areaLine[line].oy = oy;
+    }
+  }
+
   public xluMove(l, y) {
     const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l,y,h0,h1);
-    if( this.areaNum === 1 ) {
-      this.areaLine[6].oy = oy;
-    } else if ((this.areaNum === 2) && (this.rotation === 1)) {
-      this.areaLine[6].oy = oy;
-    } else if ((this.areaNum === 3) && (this.rotation === 0)) {
-      this.areaLine[6].oy = oy;
-    }
+    const oy =  this.xLineOffsetY(l, y, h0, h1);
+    this.sameBlankLineX( 6 , 1 , 0 , oy);
   }
 
   public xllMove(l, y) {
     const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l,y,-h1,h0);
-    if( this.areaNum === 1 ) {
-      this.areaLine[7].oy = oy;
-    } else if ((this.areaNum === 2) && (this.rotation === 1)) {
-      this.areaLine[7].oy = oy;
-    } else if ((this.areaNum === 3) && (this.rotation === 2)) {
-      this.areaLine[7].oy = oy;
-    }
+    const oy =  this.xLineOffsetY(l, y, -h1, h0);
+    this.sameBlankLineX( 7 , 1 , 2 , oy);
   }
   public xruMove(l, y) {
     const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l,y,h0,h1);
-    if( this.areaNum === 1 ) {
-      this.areaLine[4].oy = oy;
-    } else if ((this.areaNum === 2) && (this.rotation === 1)) {
-      this.areaLine[4].oy = oy;
-    } else if ((this.areaNum === 3) && (this.rotation === 0)) {
-      this.areaLine[4].oy = oy;
-    }
+    const oy =  this.xLineOffsetY(l, y, h0, h1);
+    this.sameBlankLineX( 4 , 1 , 0 , oy);
   }
   public xrlMove(l, y) {
     const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l,y,-h1,h0);
-    if( this.areaNum === 1 ) {
-      this.areaLine[5].oy = oy;
-    } else if ((this.areaNum === 2) && (this.rotation === 1)) {
-      this.areaLine[5].oy = oy;
-    } else if ((this.areaNum === 3) && (this.rotation === 2)) {
-      this.areaLine[5].oy = oy;
-    }
+    const oy =  this.xLineOffsetY(l, y, -h1, h0);
+    this.sameBlankLineX( 5 , 1 , 2 , oy);
   }
 
   public touchMove(event) {
@@ -365,7 +336,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '0': // 0:縦左上
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[1].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 0)) {
                   this.areaLine[1].isMove = true;
@@ -374,7 +345,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '1': // 1:縦左下
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[0].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 0)) {
                   this.areaLine[0].isMove = true;
@@ -383,7 +354,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '2': // 2:縦右上
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[3].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 0)) {
                   this.areaLine[3].isMove = true;
@@ -392,7 +363,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '3': // 3:縦右下
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[2].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 0)) {
                   this.areaLine[2].isMove = true;
@@ -421,7 +392,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '4': // 4:横左上
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[6].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 1)) {
                   this.areaLine[6].isMove = true;
@@ -430,7 +401,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '5': // 5:横左下
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[7].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 1)) {
                   this.areaLine[7].isMove = true;
@@ -439,7 +410,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '6': // 6:横右上
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[7].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 1)) {
                   this.areaLine[7].isMove = true;
@@ -448,7 +419,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
                 }
                 break;
               case '7': // 7:横右下
-                if ( this.areaNum === 1 ){
+                if ( this.areaNum === 1 ) {
                   this.areaLine[5].isMove = true;
                 } else if ((this.areaNum === 2) && (this.rotation === 1)) {
                   this.areaLine[5].isMove = true;
@@ -869,14 +840,22 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(0,0,255,0.2)' }    // エリア４
         ];
         this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
+          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4,
+          ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
+          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4,
+          ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
+          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4,
+          ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
+          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+          ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
+          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
+          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
+          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
+          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
           { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
           { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
           { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
@@ -891,18 +870,30 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(0,0,255,0.2)' }    // エリア４
         ];
         this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
-          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
-          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
-          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
-          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
+          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
+          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
+          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
+          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
+          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
+          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
+          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
+          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
+          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6,
+           ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
+          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6,
+           ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
+          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6,
+           ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
+          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6,
+           ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
         ];
         break;
       case 3:
@@ -913,18 +904,30 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(0,0,255,0.2)' }    // エリア４
         ];
         this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
-          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
-          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
-          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
-          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
+          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4,
+          ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
+          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
+          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
+          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
+          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
+          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
+          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
+          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
+          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6,
+           ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
+          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6,
+           ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
+          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6,
+           ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
+          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6,
+           ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
         ];
         break;
       case 4:
@@ -935,14 +938,22 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           { x: w2, y: h2, w: w2, h: h2, ishide: false, color: 'rgba(0,0,255,0.2)' }    // エリア４
         ];
         this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
+          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
+          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
+          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
+          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
+          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
+          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
+          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
+          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4,
+           ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
           { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
           { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
           { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
