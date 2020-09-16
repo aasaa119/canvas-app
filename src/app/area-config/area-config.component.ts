@@ -1,6 +1,7 @@
 import { Component, ViewChild, OnInit, AfterViewInit, Input } from '@angular/core';
 import { Lexer } from '@angular/compiler';
 import { toUnicode } from 'punycode';
+import { config } from 'process';
 
 @Component({
   selector: 'app-area-config',
@@ -17,6 +18,8 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   public h = 0;
 
   public img;
+  public transmittedImageData;
+  public transmittedData;
 
   public gridx = 40;
   public gridy = 40;
@@ -55,7 +58,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     if (canvas.getContext) {
       const ctx = canvas.getContext('2d');
 
-      
+
       ctx.clearRect(0, 0, this.w + (this.offsetX * 2), this.h + (this.offsetY * 2));
       // グリット描画
       ctx.strokeStyle = 'rgba(200,200,200,1)';
@@ -92,46 +95,44 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           ctx.shadowOffsetX = 0;
           ctx.shadowOffsetY = 0;
         }
-        
       }
-      //ctx.drawImage(this.img, this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40 );
-      this.img.onload = () =>{
-        ctx.drawImage(this.img, this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40 );
+//      ctx.drawImage(this.img, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20, 40 , 40 );
+      this.transmittedImageData.data.set( this.transmittedData);
+      console.log(this.transmittedData);
+      ctx.putImageData( this.transmittedImageData, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20 );
+      //ctx.putImageData( this.transmittedImageData, 0 , 0 );
+      // console.log(this.transmittedData);
+      // this.transmittedImageData.data.set( this.transmittedData);
+      // ctx.putImageData( this.transmittedImageData, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20 );
 
-        for(var i = 0; i < (this.img.width*this.img.height); i++) {
-          if((this.img.data[i*4] == 255) &&
-             (this.img.data[i*4+1] == 255) &&
-             (this.img.data[i*4+2] == 255)) {
-              this.img.data[i*4+3] = 0;
-          }
-        }
-        ctx.putImageData(this.img, this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20);
-
-
-
-        // var $originalImageData = ctx.getImageData(this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40), //オリジナルの画像DATAを確保
-        // $transmittedImageData = ctx.getImageData(this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40), //透過用の画像DATAを確保
-        // $originalData = $originalImageData.data, //オリジナルのdataを保存する場所
-        // $transmittedData = $transmittedImageData.data, //透過用のdataを保存する場所
-        // isClicked = false; //クリックのトグルのためのフラグを準備
-        // //透過用のdataを作成
-        // for(var i = 0; i < $transmittedData.length; i += 4){
-        //   //各カラーチャンネルで、一番暗い値を取得
-        //   var minLuminance = 255;
-        //   if($transmittedData[i] < minLuminance)
-        //     minLuminance = $transmittedData[i];
-        //   if($transmittedData[i + 1] < minLuminance)
-        //     minLuminance = $transmittedData[i + 1];
-        //   if($transmittedData[i + 2] < minLuminance)
-        //     minLuminance = $transmittedData[i + 2];
-   
-        //   //一番暗い値を、アルファチャンネルに反映(明るいところほど透明に)
-        //   $transmittedData[i + 3] = 255 - minLuminance;
-
-        //   $transmittedImageData.data.set($transmittedData);
-        //   ctx.putImageData($transmittedImageData,this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20);
-        //}
-      }
+      // this.img.onload = () => {
+      //   ctx.drawImage(this.img, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20, 40 , 40 );
+      //   // const originalImageData = ctx.getImageData(this.img, this.w / 2 + this.offsetX - 20 ,
+      //   //                             this.h / 2 + this.offsetY - 20, 40 , 40 ); // オリジナルの画像DATAを確保
+      //   // this.transmittedImageData = ctx.getImageData(this.img, this.w / 2 + this.offsetX - 20 ,
+      //   //                             this.h / 2 + this.offsetY - 20, 40 , 40 ); // 透過用の画像DATAを確保
+      //   // const originalData = originalImageData.data; // オリジナルのdataを保存する場所
+      //   // this.transmittedData = this.transmittedImageData.data; // 透過用のdataを保存する場所
+      //   // // let isClicked = false; // クリックのトグルのためのフラグを準備
+      //   // // 透過用のdataを作成
+      //   // for ( let i = 0; i < this.transmittedData.length; i += 4) {
+      //   //   // 各カラーチャンネルで、一番暗い値を取得
+      //   //   let minLuminance = 255;
+      //   //   if (this.transmittedData[i] < minLuminance){
+      //   //     minLuminance = this.transmittedData[i];
+      //   //   }
+      //   //   if (this.transmittedData[i + 1] < minLuminance){
+      //   //     minLuminance = this.transmittedData[i + 1];
+      //   //   }
+      //   //   if (this.transmittedData[i + 2] < minLuminance){
+      //   //     minLuminance = this.transmittedData[i + 2];
+      //   //   }
+      //   //   // 一番暗い値を、アルファチャンネルに反映(明るいところほど透明に)
+      //   //   this.transmittedData[i + 3] = 255 - minLuminance;
+      //   // }
+      //   // this.transmittedImageData.data.set( this.transmittedData);
+      //   // ctx.putImageData( this.transmittedImageData, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20 );
+      // };
     }
   }
 
@@ -1007,8 +1008,36 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     // console.log(this.areaNum);
 
     this.img = new Image();
-    this.img.src = 'assets/maru.png'
+    this.img.src = 'assets/maru.png';
 
+    const can = this.myCanvas.nativeElement;
+    if (can.getContext) {
+      const ctx = can.getContext('2d');
+      this.img.onload = () => {
+        ctx.drawImage(this.img, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20, 40 , 40 );
+        this.transmittedImageData =
+              ctx.getImageData(this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20, 40 , 40 ); // 透過用の画像DATAを確保
+        this.transmittedData = this.transmittedImageData.data; // 透過用のdataを保存する場所
+        // 透過用のdataを作成
+        for ( let i = 0; i < this.transmittedData.length; i += 4) {
+          // 各カラーチャンネルで、一番暗い値を取得
+          let minLuminance = 255;
+          if (this.transmittedData[i] < minLuminance){
+            minLuminance = this.transmittedData[i];
+          }
+          if (this.transmittedData[i + 1] < minLuminance){
+            minLuminance = this.transmittedData[i + 1];
+          }
+          if (this.transmittedData[i + 2] < minLuminance){
+            minLuminance = this.transmittedData[i + 2];
+          }
+          // 一番暗い値を、アルファチャンネルに反映(明るいところほど透明に)
+          this.transmittedData[i + 3] = 255 - minLuminance;
+        }
+        this.transmittedImageData.data.set( this.transmittedData);
+        ctx.putImageData( this.transmittedImageData, this.w / 2 + this.offsetX - 20 , this.h / 2 + this.offsetY - 20 );
+      };
+    }
     this.draw();
 
     // const c = this.canvas.getElementById('stage');
