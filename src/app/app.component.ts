@@ -1,5 +1,5 @@
 import { by,element } from 'protractor';
-import { Component } from '@angular/core';
+import { Component , ViewChild} from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -7,16 +7,17 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+  @ViewChild('config') config;
   title = 'canvas-app';
 
   /** 選択されたエリア番号 */
-  area : number;
+  area: number;
 
   /** エリア選択 */
   firstLoad = true;
 
   /** */
-  areaNumber:number = 5;
+  areaNumber: number = 5;
 
   /**
    * 選択されたエリア番号を取得する
@@ -30,12 +31,14 @@ export class AppComponent {
   /**
    * 次へボタン押下時の処理
    */
-  nextButtonTapped(){
+  nextButtonTapped() {
     this.firstLoad = false;
-    if(this.areaNumber>1){
+    if ( this.areaNumber > 1 ) {
       this.areaNumber--;
     }
-
+    console.log(this.config);
+    this.config.areaNum = this.areaNumber;
+    console.log(this.config);
     // console.log(by.tagName('app-hero-parent'));
     console.log('エリア数：' + this.areaNumber);
   }

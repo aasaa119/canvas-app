@@ -19,12 +19,12 @@
 </ul> -->
 <button (click)="nextButtonTapped()">次へ</button>
 
-<div class="select-area" *ngIf="firstLoad; else nextLoad">
+<!-- <div class="select-area" *ngIf="firstLoad; else nextLoad">
   <app-area-config [areaNum]='0' [isDrag]='true'></app-area-config>
 </div>
 
 <ng-template #nextLoad>
-  <div [ngSwitch]="areaNumber">
+  <div [ngSwitch] = "areaNumber" >
       <div *ngSwitchCase="1" class="select-area">
           <app-area-config [areaNum]='4' [isDrag]='true'></app-area-config>
       </div>
@@ -38,7 +38,7 @@
           <app-area-config [areaNum]='1' [isDrag]='true'></app-area-config>
       </div>
   </div>
-</ng-template>
+</ng-template> -->
 
-<!-- <app-area-config [areaNum]='4' [isDrag]='true' [InDoorMode]='1' ></app-area-config> -->
+<app-area-config #config [areaNum]='4' [isDrag]='true' [InDoorMode]='1' ></app-area-config>
 <router-outlet></router-outlet>

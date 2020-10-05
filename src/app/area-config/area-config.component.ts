@@ -1,4 +1,4 @@
-import { Component, ViewChild, OnInit, AfterViewInit, Input } from '@angular/core';
+import { Component, ViewChild, OnInit, AfterViewInit, OnChanges, Input , SimpleChanges } from '@angular/core';
 import { Lexer } from '@angular/compiler';
 import { toUnicode } from 'punycode';
 
@@ -7,15 +7,12 @@ import { toUnicode } from 'punycode';
   templateUrl: './area-config.component.html',
   styleUrls: ['./area-config.component.css']
 })
-export class AreaConfigComponent implements OnInit, AfterViewInit {
+export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges{
 
   @ViewChild('myCanvas') myCanvas;
-  @Input() areaNum;         // 接続エリア数
+  @Input() areaNum: number;        // 接続エリア数
   @Input() isDrag = true;
   @Input() InDoorMode = 1;      // 室内機No
-
-
-
 
   public w = 0;
   public h = 0;
@@ -63,8 +60,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
 
+    console.log('ngOnInit()');
+
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('[ngOnChanges] execute');
+    // SimpleChanges を使って変更前の値と変更後の値、そして変更されているかをログ出力する
+    // tslint:disable-next-line: forin
+    for (const prop in changes) {
+      const change = changes[prop];
+      console.log(`${prop}: ${change.firstChange}, ${change.previousValue} => ${change.currentValue}`);
+    }
+    console.log('ngOnChanges()');
+  }
   public drawLine(ctx: any , x1: number , y1: number , x2: number , y2: number ) {
     ctx.beginPath();
 
@@ -74,12 +83,10 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     ctx.stroke();
   }
 
-
   public draw() {
     const canvas = this.myCanvas.nativeElement;
     if (canvas.getContext) {
       const ctx = canvas.getContext('2d');
-
 
       ctx.clearRect(0, 0, this.w + (this.offsetX * 2), this.h + (this.offsetY * 2));
       // グリット描画
@@ -895,6 +902,9 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
 
 
   ngAfterViewInit() {
+
+    console.log('ngAfterViewInit()');
+    console.log(this.areaRect)
 
     const canvas = this.myCanvas.nativeElement;
     canvas.addEventListener('touchstart', this, false);
