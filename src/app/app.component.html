@@ -17,6 +17,12 @@
     <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
   </li>
 </ul> -->
+<button (click)="areaNum0()">接続エリア数0</button>
+<button (click)="areaNum1()">接続エリア数1</button>
+<button (click)="areaNum2()">接続エリア数2</button>
+<button (click)="areaNum3()">接続エリア数3</button>
+<button (click)="areaNum4()">接続エリア数4</button>
+<button (click)="prevButtonTapped()">戻る</button>
 <button (click)="nextButtonTapped()">次へ</button>
 
 <!-- <div class="select-area" *ngIf="firstLoad; else nextLoad">
@@ -40,5 +46,5 @@
   </div>
 </ng-template> -->
 
-<app-area-config #config [areaNum]='4' [isDrag]='true' [InDoorMode]='1' ></app-area-config>
+<app-area-config [areaNum]=areaNumber [isDrag]='true' [InDoorMode]=indoor ></app-area-config>
 <router-outlet></router-outlet>

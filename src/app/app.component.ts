@@ -1,5 +1,4 @@
-import { by,element } from 'protractor';
-import { Component , ViewChild} from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +6,6 @@ import { Component , ViewChild} from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  @ViewChild('config') config;
   title = 'canvas-app';
 
   /** 選択されたエリア番号 */
@@ -17,15 +15,35 @@ export class AppComponent {
   firstLoad = true;
 
   /** */
-  areaNumber: number = 5;
+  areaNumber = 5;
+  indoor = 1;
 
   /**
    * 選択されたエリア番号を取得する
    */
-  getAreaNum(){
+  getAreaNum() {
     // this.area = this.melremoLibraryService.getArea();
     console.log('getエリア : ' + this.area);
     return this.area;
+  }
+
+  /**
+   *
+   */
+  areaNum0() {
+    this.areaNumber = 0;
+  }
+  areaNum1() {
+    this.areaNumber = 1;
+  }
+  areaNum2() {
+    this.areaNumber = 2;
+  }
+  areaNum3() {
+    this.areaNumber = 3;
+  }
+  areaNum4() {
+    this.areaNumber = 4;
   }
 
   /**
@@ -33,14 +51,22 @@ export class AppComponent {
    */
   nextButtonTapped() {
     this.firstLoad = false;
-    if ( this.areaNumber > 1 ) {
-      this.areaNumber--;
+    if ( this.indoor < 4 ) {
+      this.indoor++;
     }
-    console.log(this.config);
-    this.config.areaNum = this.areaNumber;
-    console.log(this.config);
+    // console.log(this.config);
     // console.log(by.tagName('app-hero-parent'));
-    console.log('エリア数：' + this.areaNumber);
+    console.log('エリア数：' + this.indoor);
+  }
+
+  prevButtonTapped() {
+    this.firstLoad = false;
+    if ( this.indoor > 1 ) {
+      this.indoor--;
+    }
+    // console.log(this.config);
+    // console.log(by.tagName('app-hero-parent'));
+    console.log('エリア数：' + this.indoor);
   }
 
 }
