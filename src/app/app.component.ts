@@ -15,7 +15,7 @@ export class AppComponent {
   firstLoad = true;
 
   /** */
-  areaNumber = 5;
+  areaNumber = 4;
   indoor = 1;
 
   /**
@@ -54,8 +54,6 @@ export class AppComponent {
     if ( this.indoor < 4 ) {
       this.indoor++;
     }
-    // console.log(this.config);
-    // console.log(by.tagName('app-hero-parent'));
     console.log('エリア数：' + this.indoor);
   }
 
@@ -64,8 +62,6 @@ export class AppComponent {
     if ( this.indoor > 1 ) {
       this.indoor--;
     }
-    // console.log(this.config);
-    // console.log(by.tagName('app-hero-parent'));
     console.log('エリア数：' + this.indoor);
   }
 

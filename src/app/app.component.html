@@ -24,7 +24,8 @@
 <button (click)="areaNum4()">接続エリア数4</button>
 <button (click)="prevButtonTapped()">戻る</button>
 <button (click)="nextButtonTapped()">次へ</button>
-
+<p>エリア数：{{areaNumber}}</p>
+<p>室内機：{{indoor}}</p>
 <!-- <div class="select-area" *ngIf="firstLoad; else nextLoad">
   <app-area-config [areaNum]='0' [isDrag]='true'></app-area-config>
 </div>
@@ -46,5 +47,5 @@
   </div>
 </ng-template> -->
 
-<app-area-config [areaNum]=areaNumber [isDrag]='true' [InDoorMode]=indoor ></app-area-config>
+<app-area-config  [inDoorMode]=indoor [areaNum]=areaNumber [isDrag]='true' ></app-area-config>
 <router-outlet></router-outlet>

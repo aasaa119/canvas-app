@@ -9,10 +9,10 @@ import { toUnicode } from 'punycode';
 })
 export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
-  @ViewChild('myCanvas') myCanvas;
+  @ViewChild('myCanvas') myCanvas: any;
+  @Input() inDoorMode: number;      // 室内機No
   @Input() areaNum: number;        // 接続エリア数
-  @Input() isDrag = true;
-  @Input() InDoorMode = 1;      // 室内機No
+  @Input() isDrag: boolean;
 
   public w = 0;
   public h = 0;
@@ -74,18 +74,21 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
       if ( prop === 'areaNum') {
         this.ngAfterViewInit();
-      } else if ( prop === 'InDoorMode') {
-        // let isChange = false;
+      } else if ( prop === 'inDoorMode') {
+        let isChange = false;
 
-        // for (const r of this.areaRect) {
-        //   if ( change.previousValue === r.area) {
-        //     isChange = true;
-        //   }
-        // }
-        // if ( isChange === false) {
-        //    this.InDoorMode = change.previousValue;
-        //    console.log(this.InDoorMode);
-        // }
+        for (const r of this.areaRect) {
+          console.log('r.area: ' + r.area);
+          console.log('change.previousValue: ' + change.previousValue);
+          if ( change.previousValue === r.area) {
+            isChange = true;
+          }
+        }
+        if ( isChange === false) {
+            this.inDoorMode = change.previousValue;
+            console.log('this.InDoorMode: ' + this.inDoorMode);
+        }
+        this.draw();
       }
     }
     console.log('ngOnChanges()');
@@ -114,6 +117,37 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     ctx.setLineDash([1]);
   }
 
+  public drawArea(ctx: any) {
+    for (const r of this.areaRect) {
+      if (r.isHide === false) {
+        ctx.fillStyle = this.areaColor[r.area];
+        ctx.fillRect(r.x + this.offsetX, r.y + this.offsetY, r.w, r.h);
+      }
+    }
+  }
+
+  public drawAreaLine(ctx: any){
+    for (const l of this.areaLine) {
+      if (l.isHide === false) {
+        ctx.lineWidth = (l.n < 8 ) ? 4 : 6;
+        ctx.strokeStyle = l.color;
+        if (l.isMove === true) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 5;
+          ctx.shadowOffsetX = 5;
+          ctx.shadowOffsetY = 5;
+        }
+        this.drawLine(ctx ,
+          l.x1 + l.ox + this.offsetX ,
+          l.y1 + l.oy + this.offsetY ,
+          l.x2 + l.ox + this.offsetX ,
+          l.y2 + l.oy + this.offsetY );
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      }
+    }
+  }
 
   public draw() {
     const canvas = this.myCanvas.nativeElement;
@@ -123,81 +157,24 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
       ctx.clearRect(0, 0, this.w + (this.offsetX * 2), this.h + (this.offsetY * 2));
       // グリット描画
       this.drawGred(ctx);
-
       // エリア描画
-      for (const r of this.areaRect) {
-        if (r.isHide === false) {
-          ctx.fillStyle = this.areaColor[r.area];
-          ctx.fillRect(r.x + this.offsetX, r.y + this.offsetY, r.w, r.h);
-        }
-      }
+      this.drawArea(ctx);
       // エリア選択ライン描画
-      for (const l of this.areaLine) {
-        if (l.isHide === false) {
-          ctx.lineWidth = (l.n < 8 ) ? 4 : 6;
-          ctx.strokeStyle = l.color;
-          if (l.isMove === true) {
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 5;
-            ctx.shadowOffsetX = 5;
-            ctx.shadowOffsetY = 5;
-          }
-          this.drawLine(ctx ,
-            l.x1 + l.ox + this.offsetX ,
-            l.y1 + l.oy + this.offsetY ,
-            l.x2 + l.ox + this.offsetX ,
-            l.y2 + l.oy + this.offsetY );
-          ctx.shadowBlur = 0;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-        }
-      }
-      // ctx.drawImage(this.img, this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40 );
-      // this.img.onload = () =>{
-      //   ctx.drawImage(this.img, this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40 );
-
-      //   for(var i = 0; i < (this.img.width*this.img.height); i++) {
-      //     if((this.img.data[i*4] == 255) &&
-      //        (this.img.data[i*4+1] == 255) &&
-      //        (this.img.data[i*4+2] == 255)) {
-      //         this.img.data[i*4+3] = 0;
-      //     }
-      //   }
-      //   ctx.putImageData(this.img, this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20);
-
-      // var $originalImageData = ctx.getImageData(this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40), //オリジナルの画像DATAを確保
-        // $transmittedImageData = ctx.getImageData(this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20, 40 , 40), //透過用の画像DATAを確保
-        // $originalData = $originalImageData.data, //オリジナルのdataを保存する場所
-        // $transmittedData = $transmittedImageData.data, //透過用のdataを保存する場所
-        // isClicked = false; //クリックのトグルのためのフラグを準備
-        // //透過用のdataを作成
-        // for(var i = 0; i < $transmittedData.length; i += 4){
-        //   //各カラーチャンネルで、一番暗い値を取得
-        //   var minLuminance = 255;
-        //   if($transmittedData[i] < minLuminance)
-        //     minLuminance = $transmittedData[i];
-        //   if($transmittedData[i + 1] < minLuminance)
-        //     minLuminance = $transmittedData[i + 1];
-        //   if($transmittedData[i + 2] < minLuminance)
-        //     minLuminance = $transmittedData[i + 2];
-
-        //   //一番暗い値を、アルファチャンネルに反映(明るいところほど透明に)
-        //   $transmittedData[i + 3] = 255 - minLuminance;
-
-        //   $transmittedImageData.data.set($transmittedData);
-        //   ctx.putImageData($transmittedImageData,this.w/2 + this.offsetX - 20 , this.h/2 + this.offsetY - 20);
-        // }
-      // }
+      this.drawAreaLine(ctx);
     }
   }
 
   public yLineOffsetX(l: { ox: number; x1: number; }, x: number, min: number, max: number): number {
     l.ox = x - l.x1;
+    console.log(l.ox);
+    console.log('max:' + max);
+    console.log('min:' + min);
     if ( min > l.ox ) {
       l.ox = min;
     } else if ( l.ox > max ) {
       l.ox = max;
     }
+    console.log(l.ox);
     l.ox = Math.round(l.ox / this.gridx) * this.gridx;
     return(l.ox);
   }
@@ -245,11 +222,19 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     }
   }
 
+  // ブランクLine
   // 縦左上
   public yluMove(l, x) {
     const w0 = 0; const w2 = this.w / 2;
-    const min = - w0;
-    const max = w2 + ( this.areaLine[8].ox - this.gridx);
+    const min: number = -w0;
+    let max: number;
+    if ( this.areaNum === 1 ) {
+      max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
+    } else if ( this.areaNum === 2 ) {
+    } else if ( this.areaNum === 3 ) {
+    } else {
+      max = w2 + (this.areaLine[8].ox - this.gridx);
+    }
     const ox =  this.yLineOffsetX(l, x, min, max);
     this.sameBlankLineY( 1 , 0 , 3 , ox);
   }
@@ -258,24 +243,49 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   public yllMove(l, x) {
     const w0 = 0; const w2 = this.w / 2;
     const min = - w0;
-    const max = w2 + ( this.areaLine[9].ox - this.gridx);
+    let max: number;
+    if ( this.areaNum === 1 ) {
+      max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
+    } else if ( this.areaNum === 2 ) {
+    } else if ( this.areaNum === 3 ) {
+    } else {
+      max = w2 + (this.areaLine[9].ox - this.gridx);
+    }
     const ox =  this.yLineOffsetX(l, x, min, max);
     this.sameBlankLineY( 0 , 0 , 3 , ox);
   }
 
   // 縦右上
   public yruMove(l, x) {
-    const w0 = 0; const w2 = this.w / 2;
-    const min = - w2 + ( this.areaLine[8].ox + this.gridx);
+    const w0 = 0; const w2 = this.w / 2; const w1 = this.w;
+    let min: number;
     const max = w0;
+
+    if ( this.areaNum === 1 ) {
+      min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
+    } else if ( this.areaNum === 2 ) {
+    } else if ( this.areaNum === 3 ) {
+    } else {
+      min = - w2 + ( this.areaLine[8].ox + this.gridx);
+    }
+
     const ox =  this.yLineOffsetX(l, x, min, max);
     this.sameBlankLineY( 3 , 0 , 1 , ox);
   }
 
   public yrlMove(l, x) {
-    const w0 = 0; const w2 = this.w / 2;
-    const min = - w2 + ( this.areaLine[9].ox + this.gridx);
+    const w0 = 0; const w2 = this.w / 2; const w1 = this.w;
+    let min: number;
     const max = w0;
+
+    if ( this.areaNum === 1 ) {
+      min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
+    } else if ( this.areaNum === 2 ) {
+    } else if ( this.areaNum === 3 ) {
+    } else {
+      min = - w2 + ( this.areaLine[9].ox + this.gridx);
+    }
+
     const ox =  this.yLineOffsetX(l, x, min, max);
     this.sameBlankLineY( 2 , 0 , 1 , ox);
   }
@@ -591,17 +601,17 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
       if ( r.isHide === false && r.isTouch === true ) {
         if ( (r.x < x ) && ( x < (r.x + r.w)) && (r.y < y ) && ( y < (r.y + r.h)) ) {
           if ( r.area === 0 ) {
-            r.area = this.InDoorMode;
+            console.log(this.inDoorMode);
+            r.area = this.inDoorMode;
             isTouch = true;
           }
-          console.log(r);
         }
       }
     }
     if ( isTouch === true ) {
       for (const r of this.areaRect ) {
         if ( r.isHide === false && r.isTouch === false ) {
-          if ( r.area === this.InDoorMode ) {
+          if ( r.area === this.inDoorMode ) {
           r.area = 0;
           }
         }
@@ -951,6 +961,11 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   ngAfterViewInit() {
 
     console.log('ngAfterViewInit()');
+    console.log(this.inDoorMode);
+    console.log(this.areaNum);
+    console.log(this.isDrag);
+
+    this.inDoorMode = 1;
 
     const canvas = this.myCanvas.nativeElement;
     canvas.addEventListener('touchstart', this, false);
