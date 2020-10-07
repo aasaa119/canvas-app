@@ -2,6 +2,7 @@ import { Component, ViewChild, OnInit, AfterViewInit, OnChanges, Input , SimpleC
 import { Lexer } from '@angular/compiler';
 import { toUnicode } from 'punycode';
 
+
 @Component({
   selector: 'app-area-config',
   templateUrl: './area-config.component.html',
@@ -14,18 +15,18 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   @Input() areaNum: number;        // 接続エリア数
   @Input() isDrag: boolean;
 
-  public w = 0;
-  public h = 0;
+  public w = 0;     // 描画エリア
+  public h = 0;     // 描画エリア
 
   public img;
 
-  public gridx = 40;
-  public gridy = 40;
-  public offsetX = 20;
-  public offsetY = 20;
-  public touchsize = 10;
+  public gridx = 40;      // X軸グリッドサイズ
+  public gridy = 40;      // Y軸グリッドサイズ
+  public offsetX = 20;    // X描画エリアオフセット 描画エリアの左右にマージンを設ける
+  public offsetY = 20;    // Y描画エリアオフセット 描画エリアの上下にマージンを設ける
+  public touchsize = 10;  // Lineをタッチした時の閾値ライン座標 ±touchsizeでタッチを判断する
 
-  private rotation = 0;
+  private rotation = 0;   // 接続エリア数が 2or3の時の描画モード
 
   public istapX = false;
   public istapY = false;
@@ -48,10 +49,10 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     { n: 5, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 5:横左下
     { n: 6, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 6:横右上
     { n: 7, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' },  // 7:横右下
-    { n: 8, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 縦上
-    { n: 9, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 縦下
-    { n: 10, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 横右
-    { n: 11, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },   // 横左
+    { n: 8, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 8:縦上
+    { n: 9, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 9:縦下
+    { n: 10, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 10:横右
+    { n: 11, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },   // 11:横左
   ];
 
   public areaColor = ['rgba(255,255,255,0.0)', 'rgba(0,255,0,0.2)', 'rgba(0,0,255,0.2)', 'rgba(255,0,0,0.2)', 'rgba(255,255,0,0.2)'];
@@ -59,9 +60,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   constructor() { }
 
   ngOnInit() {
-
     console.log('ngOnInit()');
-
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -75,19 +74,63 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
       if ( prop === 'areaNum') {
         this.ngAfterViewInit();
       } else if ( prop === 'inDoorMode') {
-        let isChange = false;
+        // 室内機設定が変わった時
+
+        let isSet = false;
 
         for (const r of this.areaRect) {
-          console.log('r.area: ' + r.area);
-          console.log('change.previousValue: ' + change.previousValue);
-          if ( change.previousValue === r.area) {
-            isChange = true;
+          if ( r.area === change.previousValue) {
+            isSet = true;
           }
         }
-        if ( isChange === false) {
-            this.inDoorMode = change.previousValue;
-            console.log('this.InDoorMode: ' + this.inDoorMode);
+
+
+        if ( isSet === false ) {
+          // 室内機の設定を保留する
+        } else {
+
         }
+
+
+
+        // if ( this.areaNum === 1 ) {
+        //   for (const r of this.areaRect) {
+        //     if ( r.area === 1) {
+        //       isSet = true;
+        //     }
+        //   }
+        // } else if ( this.areaNum === 2 ) {
+        //   if (this.rotation === 0 ) {
+        //   } else {
+
+        //   }
+        // } else if ( this.areaNum === 3 ) {
+        //   if (this.rotation === 0 ) {
+        //   } else if ( this.rotation === 1 ) {
+        //   } else if ( this.rotation === 2 ) {
+        //   } else {
+        //   }
+        // } else if ( this.areaNum === 4 ) {
+        // }
+
+        console.log('isSet: ' + isSet);
+
+
+        // let isChange = false;
+
+
+
+        // for (const r of this.areaRect) {
+        //   console.log('r.area: ' + r.area);
+        //   console.log('change.previousValue: ' + change.previousValue);
+        //   if ( change.previousValue === r.area) {
+        //     isChange = true;
+        //   }
+        // }
+        // if ( isChange === false) {
+        //     this.inDoorMode = change.previousValue;
+        //     console.log('this.InDoorMode: ' + this.inDoorMode);
+        // }
         this.draw();
       }
     }
@@ -126,7 +169,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     }
   }
 
-  public drawAreaLine(ctx: any){
+  public drawAreaLine(ctx: any) {
     for (const l of this.areaLine) {
       if (l.isHide === false) {
         ctx.lineWidth = (l.n < 8 ) ? 4 : 6;
@@ -182,8 +225,59 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   // 縦上
   public yuMove(l, x) {
     const w2 = this.w / 2;
-    const max = w2 + ( this.areaLine[2].ox - this.gridx);
-    const min = - w2  + ( this.areaLine[0].ox + this.gridx);
+    let min = 0;
+    let max = 0;
+
+    if ( this.areaNum === 1 ) {
+      // 非表示のため処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      } else {
+        // 非表示のため処理無し
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        // 非表示のため処理無し
+      } else if ( this.rotation === 1 ) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      } else if ( this.rotation === 3 ) {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+
+      }
+    } else {
+      if (this.isXline === true) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox ) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      }
+    }
+
     const ox =  this.yLineOffsetX(l, x, min , max );
     if (this.isXline === true) {
       this.areaLine[8].ox = ox;
@@ -198,8 +292,60 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   // 縦下
   public ylMove(l, x) {
     const w2 = this.w / 2;
-    const max = w2 + ( this.areaLine[3].ox - this.gridx);
-    const min = - w2  + ( this.areaLine[1].ox + this.gridx);
+    let max = 0;
+    let min = 0;
+
+    if ( this.areaNum === 1 ) {
+      // 非表示のため処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      } else {
+        // 非表示のため処理無し
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      } else if ( this.rotation === 1 ) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        // 非表示のため処理なし
+      } else if ( this.rotation === 3 ) {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+
+      }
+    } else {
+      if (this.isXline === true) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox ) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      }
+
+    }
+
     const ox =  this.yLineOffsetX(l, x, min , max );
     if (this.isXline === true) {
       this.areaLine[9].ox = ox;
@@ -231,7 +377,23 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     if ( this.areaNum === 1 ) {
       max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
     } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
+        max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
+      }
     } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
+      } else if ( this.rotation === 1 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 3 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
+
+      }
     } else {
       max = w2 + (this.areaLine[8].ox - this.gridx);
     }
@@ -247,7 +409,23 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     if ( this.areaNum === 1 ) {
       max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
     } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
+        max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
+      }
     } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 1 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
+      } else if ( this.rotation === 3 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
+
+      }
     } else {
       max = w2 + (this.areaLine[9].ox - this.gridx);
     }
@@ -264,9 +442,25 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     if ( this.areaNum === 1 ) {
       min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
     } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else {
+        min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
+      }
     } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
+      } else if ( this.rotation === 1 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else if ( this.rotation === 2 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else if ( this.rotation === 3 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else {
+
+      }
     } else {
-      min = - w2 + ( this.areaLine[8].ox + this.gridx);
+      min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
     }
 
     const ox =  this.yLineOffsetX(l, x, min, max);
@@ -281,9 +475,25 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     if ( this.areaNum === 1 ) {
       min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
     } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else {
+        min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
+      }
     } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else if ( this.rotation === 1 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else if ( this.rotation === 2 ) {
+        min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
+      } else if ( this.rotation === 3 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else {
+
+      }
     } else {
-      min = - w2 + ( this.areaLine[9].ox + this.gridx);
+      min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
     }
 
     const ox =  this.yLineOffsetX(l, x, min, max);
@@ -303,7 +513,61 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
   public xlMove(l, y) {
     const h2 = this.h / 2;
-    const oy =  this.xLineOffsetY(l, y, -h2, h2);
+
+    let min = 0;
+    let max = 0;
+
+    if ( this.areaNum === 1 ) {
+      // 処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+        // 非表示のため処理なし
+      } else {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        max = h2 + ( this.areaLine[5].oy - this.gridy);
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else if ( this.rotation === 1 ) {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        max = h2 + ( this.areaLine[5].oy - this.gridy);
+      } else if ( this.rotation === 2 ) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      } else if ( this.rotation === 3 ) {
+        // 非表示のため処理なし
+      } else {
+
+      }
+    } else {
+      if (this.isYline === true) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        max = h2 + ( this.areaLine[5].oy - this.gridy);
+      }
+    }
+
+    const oy =  this.xLineOffsetY(l, y, min, max);
     if (this.isYline === true) {
       this.areaLine[8].y2 = (h2) + oy;
       this.areaLine[9].y1 = (h2) + oy;
@@ -318,7 +582,59 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
   public xrMove(l, y) {
     const h2 = this.h / 2;
-    const oy =  this.xLineOffsetY(l, y, -h2, h2);
+    let min = 0;
+    let max = 0;
+
+    if ( this.areaNum === 1 ) {
+      // 処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+
+      } else {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else if ( this.rotation === 1 ) {
+        // 非表示のため処理なし
+      } else if ( this.rotation === 2 ) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      } else if ( this.rotation === 3 ) {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      } else {
+
+      }
+    } else {
+      if (this.isYline === true) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      }
+    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
     if (this.isYline === true) {
       this.areaLine[8].y2 = (h2) + oy;
       this.areaLine[9].y1 = (h2) + oy;
@@ -342,25 +658,132 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     }
   }
 
+  // 横左上(4)
   public xluMove(l, y) {
-    const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l, y, h0, h1);
+    const h0 = 0 ; const h1 = this.h; const h2 = this.h / 2;
+    const min = h0;
+    let max: number;
+
+    if ( this.areaNum === 1 ) {
+      max = (this.areaLine[5].y1 + this.areaLine[5].oy) - this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = (this.areaLine[5].y1 + this.areaLine[5].oy) - this.gridy;
+      } else {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      } else if ( this.rotation === 1 ) {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      } else if ( this.rotation === 3 ) {
+        max = (this.areaLine[5].y1 + this.areaLine[5].oy) - this.gridy;
+      } else {
+
+      }
+    } else {
+      max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
     this.sameBlankLineX( 6 , 1 , 0 , oy);
   }
 
+  // 横左下(5)
   public xllMove(l, y) {
     const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l, y, -h1, h0);
+    let min: number;
+    const max = h0;
+    if ( this.areaNum === 1 ) {
+      min = -h1 + (this.areaLine[4].y1 + this.areaLine[4].oy) + this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if ( this.rotation === 0 ) {
+        min = -h1 + (this.areaLine[4].y1 + this.areaLine[4].oy) + this.gridy;
+      } else {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      } else if ( this.rotation === 1 ) {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      } else if ( this.rotation === 2 ) {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      } else if ( this.rotation === 3 ) {
+        min = -h1 + (this.areaLine[4].y1 + this.areaLine[4].oy) + this.gridy;
+      } else {
+
+      }
+    } else {
+      min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
     this.sameBlankLineX( 7 , 1 , 2 , oy);
   }
+
+  // 横右上(6)
   public xruMove(l, y) {
-    const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l, y, h0, h1);
+    const h0 = 0 ; const h1 = this.h; const h2 = this.h / 2;
+    const min = h0;
+    let max: number;
+
+    if ( this.areaNum === 1 ) {
+      max = (this.areaLine[7].y1 + this.areaLine[7].oy) - this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = (this.areaLine[7].y1 + this.areaLine[7].oy) - this.gridy;
+      } else {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      } else if ( this.rotation === 1 ) {
+        max = (this.areaLine[7].y1 + this.areaLine[7].oy) - this.gridy;
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      } else if ( this.rotation === 3 ) {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      } else {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      }
+    } else {
+      max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
     this.sameBlankLineX( 4 , 1 , 0 , oy);
   }
+  // 横右下(7)
   public xrlMove(l, y) {
     const h0 = 0 ; const h1 = this.h;
-    const oy =  this.xLineOffsetY(l, y, -h1, h0);
+    let min: number;
+    const max = h0;
+    if ( this.areaNum === 1 ) {
+      min = -h1 + (this.areaLine[6].y1 + this.areaLine[6].oy) + this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if ( this.rotation === 0 ) {
+        min = -h1 + (this.areaLine[6].y1 + this.areaLine[6].oy) + this.gridy;
+      } else {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      } else if ( this.rotation === 1 ) {
+        min = -h1 + (this.areaLine[6].y1 + this.areaLine[6].oy) + this.gridy;
+      } else if ( this.rotation === 2 ) {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      } else if ( this.rotation === 3 ) {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      } else {
+
+      }
+    } else {
+      min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
     this.sameBlankLineX( 5 , 1 , 2 , oy);
   }
 
@@ -713,6 +1136,19 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     const h1 = this.h;
     const h2 = this.h / 2;
 
+    this.setAreaLine(0, false , w0, h0, w0, h2);
+    this.setAreaLine(1, false , w0, h2, w0, h1);
+    this.setAreaLine(2, false , w1, h0, w1, h2);
+    this.setAreaLine(3, false , w1, h2, w1, h1);
+    this.setAreaLine(4, false , w0, h0, w2, h0);
+    this.setAreaLine(5, false , w0, h1, w2, h1);
+    this.setAreaLine(6, false , w2, h0, w1, h0);
+    this.setAreaLine(7, false , w2, h1, w1, h1);
+    this.setAreaLine(8, false , w2, h0, w2, h2);
+    this.setAreaLine(9, false , w2, h2, w2, h1);
+    this.setAreaLine(10, false , w0, h2, w2, h2);
+    this.setAreaLine(11, false , w2, h2, w1, h2);
+
     if (this.rotation === 0) {
       this.rotation = 1;
       // 縦→横変換
@@ -730,17 +1166,8 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
       this.areaLineHide(false, false, true, true);
     }
     for (const l of this.areaLine) {
-      switch (l.n) {
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-          break;
-        default:
-          l.ox = 0;
-          l.oy = 0;
-          break;
-      }
+      l.ox = 0;
+      l.oy = 0;
     }
     this.rectArea();
   }
@@ -753,6 +1180,20 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     const w2 = this.w / 2;
     const h1 = this.h;
     const h2 = this.h / 2;
+
+
+    this.setAreaLine(0, false , w0, h0, w0, h2);
+    this.setAreaLine(1, false , w0, h2, w0, h1);
+    this.setAreaLine(2, false , w1, h0, w1, h2);
+    this.setAreaLine(3, false , w1, h2, w1, h1);
+    this.setAreaLine(4, false , w0, h0, w2, h0);
+    this.setAreaLine(5, false , w0, h1, w2, h1);
+    this.setAreaLine(6, false , w2, h0, w1, h0);
+    this.setAreaLine(7, false , w2, h1, w1, h1);
+    this.setAreaLine(8, false , w2, h0, w2, h2);
+    this.setAreaLine(9, false , w2, h2, w2, h1);
+    this.setAreaLine(10, false , w0, h2, w2, h2);
+    this.setAreaLine(11, false , w2, h2, w1, h2);
 
     if (this.rotation === 0) {
       this.rotation = 1;
@@ -788,17 +1229,8 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
       this.areaLineHide(true, false, false, false);
     }
     for (const l of this.areaLine) {
-      switch (l.n) {
-        case 8:
-        case 9:
-        case 10:
-        case 11:
-          break;
-        default:
-          l.ox = 0;
-          l.oy = 0;
-          break;
-      }
+      l.ox = 0;
+      l.oy = 0;
     }
     this.rectArea();
   }
@@ -807,9 +1239,11 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   public areaNum4XTap() {
     if (this.isYline === true) {
       if (this.isXline === false) {
-        this.isXline = true;
-        this.areaLine[8].color = 'rgba(0,0,0,1)';
-        this.areaLine[9].color = 'rgba(0,0,0,1)';
+        if ( this.areaLine[8].ox === this.areaLine[9].ox ) {
+          this.isXline = true;
+          this.areaLine[8].color = 'rgba(0,0,0,1)';
+          this.areaLine[9].color = 'rgba(0,0,0,1)';
+        }
       } else {
         this.isXline = false;
         this.areaLine[8].color = 'rgba(255,0,0,1)';
@@ -821,9 +1255,11 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   public areaNum4YTap() {
     if (this.isXline === true) {
       if (this.isYline === false) {
-        this.isYline = true;
-        this.areaLine[10].color = 'rgba(0,0,0,1)';
-        this.areaLine[11].color = 'rgba(0,0,0,1)';
+        if ( this.areaLine[10].oy === this.areaLine[11].oy ) {
+          this.isYline = true;
+          this.areaLine[10].color = 'rgba(0,0,0,1)';
+          this.areaLine[11].color = 'rgba(0,0,0,1)';
+        }
       } else {
         this.isYline = false;
         this.areaLine[10].color = 'rgba(255,0,0,1)';
