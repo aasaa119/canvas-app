@@ -1,26 +1,32 @@
-import { Component, ViewChild, OnInit, AfterViewInit, Input } from '@angular/core';
+import { Component, ViewChild, OnInit, AfterViewInit, OnChanges, Input , SimpleChanges } from '@angular/core';
 import { Lexer } from '@angular/compiler';
 import { toUnicode } from 'punycode';
+
 
 @Component({
   selector: 'app-area-config',
   templateUrl: './area-config.component.html',
   styleUrls: ['./area-config.component.css']
 })
-export class AreaConfigComponent implements OnInit, AfterViewInit {
+export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
-  @ViewChild('myCanvas') myCanvas;
-  @Input() areaNum;
-  @Input() isDrag = true;
+  @ViewChild('myCanvas') myCanvas: any;
+  @Input() inDoorMode: number;      // 室内機No
+  @Input() areaNum: number;        // 接続エリア数
+  @Input() isDrag: boolean;
 
-  public w = 0;
-  public h = 0;
+  public w = 0;     // 描画エリア
+  public h = 0;     // 描画エリア
 
-  public gridx = 40;
-  public gridy = 30;
-  public touchsize = 10;
+  public img;
 
-  private rotation = 0;
+  public gridx = 40;      // X軸グリッドサイズ
+  public gridy = 40;      // Y軸グリッドサイズ
+  public offsetX = 20;    // X描画エリアオフセット 描画エリアの左右にマージンを設ける
+  public offsetY = 20;    // Y描画エリアオフセット 描画エリアの上下にマージンを設ける
+  public touchsize = 10;  // Lineをタッチした時の閾値ライン座標 ±touchsizeでタッチを判断する
+
+  private rotation = 0;   // 接続エリア数が 2or3の時の描画モード
 
   public istapX = false;
   public istapY = false;
@@ -28,421 +34,902 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   private isYline = true;
 
   /* エリア表示データ */
-  public areaRect = [];
-  public areaLine = [];
+  public areaRect = [
+    { n: 0, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア１
+    { n: 1, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア２
+    { n: 2, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア３
+    { n: 3, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  }   // エリア４
+  ];
+  public areaLine = [
+    { n: 0, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 0:縦左上
+    { n: 1, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 1:縦左下
+    { n: 2, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 2:縦右上
+    { n: 3, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 3:縦右下
+    { n: 4, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 4:横左上
+    { n: 5, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 5:横左下
+    { n: 6, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 6:横右上
+    { n: 7, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' },  // 7:横右下
+    { n: 8, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 8:縦上
+    { n: 9, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 9:縦下
+    { n: 10, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },  // 10:横右
+    { n: 11, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'black' },   // 11:横左
+  ];
+
+  public areaColor = ['rgba(255,255,255,0.0)', 'rgba(0,255,0,0.2)', 'rgba(0,0,255,0.2)', 'rgba(255,0,0,0.2)', 'rgba(255,255,0,0.2)'];
 
   constructor() { }
 
   ngOnInit() {
-    // console.log(this);
+    console.log('ngOnInit()');
   }
 
+  ngOnChanges(changes: SimpleChanges) {
+    console.log('[ngOnChanges] execute');
+    // SimpleChanges を使って変更前の値と変更後の値、そして変更されているかをログ出力する
+    // tslint:disable-next-line: forin
+    for (const prop in changes) {
+      const change = changes[prop];
+      console.log(`${prop}: ${change.firstChange}, ${change.previousValue} => ${change.currentValue}`);
+
+      if ( prop === 'areaNum') {
+        this.ngAfterViewInit();
+      } else if ( prop === 'inDoorMode') {
+        // 室内機設定が変わった時
+
+        let isSet = false;
+        let rect: any;
+        for (const r of this.areaRect) {
+          if ( r.area === change.previousValue) {
+            isSet = true;
+            rect = r;
+
+            break;
+          }
+        }
+
+        if ( isSet === false ) {
+          // 室内機の設定を保留する
+        } else {
+          if ( this.areaNum === 1 ) {
+            this.isDrag = false;
+          } else if ( this.areaNum === 2 ) {
+            if (this.rotation === 0) {
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              } else {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              }
+            } else if ( this.rotation === 1 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            }
+          } else if ( this.areaNum === 3 ) {
+            if ( this.rotation === 0 ) {
+              if ( rect.n === 0 ) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 1 ) {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 2 ) {
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            } else if ( this.rotation === 1 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+              } else if ( rect.n === 1) {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              } else if ( rect === 2 ) {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+              }
+            } else if ( this.rotation === 2 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 1) {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 2 ) {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            } else if ( this.rotation === 3 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              } else if ( rect.n === 1) {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 2 ) {
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            }
+          } else if ( this.areaNum === 4 ) {
+            if (rect.n === 0) {
+              this.areaLine[0].isDragEnable = false;
+              this.areaLine[4].isDragEnable = false;
+              this.areaLine[8].isDragEnable = false;
+              this.areaLine[10].isDragEnable = false;
+            } else if (rect.n === 1) {
+              this.areaLine[2].isDragEnable = false;
+              this.areaLine[6].isDragEnable = false;
+              this.areaLine[8].isDragEnable = false;
+              this.areaLine[11].isDragEnable = false;
+            } else if (rect.n === 2) {
+              this.areaLine[1].isDragEnable = false;
+              this.areaLine[5].isDragEnable = false;
+              this.areaLine[9].isDragEnable = false;
+              this.areaLine[10].isDragEnable = false;
+            } else if (rect.n === 3) {
+              this.areaLine[3].isDragEnable = false;
+              this.areaLine[7].isDragEnable = false;
+              this.areaLine[9].isDragEnable = false;
+              this.areaLine[11].isDragEnable = false;
+            }
+          }
+        }
+        // if ( this.areaNum === 1 ) {
+        //   for (const r of this.areaRect) {
+        //     if ( r.area === 1) {
+        //       isSet = true;
+        //     }
+        //   }
+        // } else if ( this.areaNum === 2 ) {
+        //   if (this.rotation === 0 ) {
+        //   } else {
+
+        //   }
+        // } else if ( this.areaNum === 3 ) {
+        //   if (this.rotation === 0 ) {
+        //   } else if ( this.rotation === 1 ) {
+        //   } else if ( this.rotation === 2 ) {
+        //   } else {
+        //   }
+        // } else if ( this.areaNum === 4 ) {
+        // }
+
+        console.log('isSet: ' + isSet);
+
+
+        // let isChange = false;
+
+
+
+        // for (const r of this.areaRect) {
+        //   console.log('r.area: ' + r.area);
+        //   console.log('change.previousValue: ' + change.previousValue);
+        //   if ( change.previousValue === r.area) {
+        //     isChange = true;
+        //   }
+        // }
+        // if ( isChange === false) {
+        //     this.inDoorMode = change.previousValue;
+        //     console.log('this.InDoorMode: ' + this.inDoorMode);
+        // }
+        this.draw();
+      }
+    }
+    console.log('ngOnChanges()');
+  }
+  public drawLine(ctx: any , x1: number , y1: number , x2: number , y2: number ) {
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+
+  public drawGred(ctx: any) {
+    ctx.strokeStyle = 'rgba(255,0,0,1)';
+    ctx.lineWidth = 1;
+    // 横線描画
+    ctx.setLineDash([4, 6]);
+    for (let i = 0; i <= this.h; i += this.gridy) {
+      this.drawLine(ctx , 0 + this.offsetX , i + this.offsetY , this.w + this.offsetX , i + this.offsetY );
+    }
+    // 縦線描画
+    for (let i = 0; i <= this.w; i += this.gridx) {
+      this.drawLine(ctx , i + this.offsetX , 0 + this.offsetY , i + this.offsetX , this.h + this.offsetY );
+    }
+    ctx.setLineDash([1]);
+  }
+
+  public drawArea(ctx: any) {
+    for (const r of this.areaRect) {
+      if (r.isHide === false) {
+        ctx.fillStyle = this.areaColor[r.area];
+        ctx.fillRect(r.x + this.offsetX, r.y + this.offsetY, r.w, r.h);
+      }
+    }
+  }
+
+  public drawAreaLine(ctx: any) {
+    for (const l of this.areaLine) {
+      if (l.isHide === false) {
+        ctx.lineWidth = (l.n < 8 ) ? 4 : 6;
+        ctx.strokeStyle = l.color;
+        if (l.isMove === true) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
+          ctx.shadowBlur = 5;
+          ctx.shadowOffsetX = 5;
+          ctx.shadowOffsetY = 5;
+        }
+        this.drawLine(ctx ,
+          l.x1 + l.ox + this.offsetX ,
+          l.y1 + l.oy + this.offsetY ,
+          l.x2 + l.ox + this.offsetX ,
+          l.y2 + l.oy + this.offsetY );
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      }
+    }
+  }
 
   public draw() {
     const canvas = this.myCanvas.nativeElement;
     if (canvas.getContext) {
       const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, this.w, this.h);
+      // 再描画の為消去
+      ctx.clearRect(0, 0, this.w + (this.offsetX * 2), this.h + (this.offsetY * 2));
       // グリット描画
-      ctx.strokeStyle = 'rgba(200,200,200,1)';
-      ctx.lineWidth = 1;
-      // 横線描画
-      for (let i = 0; i <= this.h; i += this.gridy) {
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(this.w, i); ctx.closePath(); ctx.stroke();
-      }
-      // 縦線描画
-      for (let i = 0; i <= this.w; i += this.gridx) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, this.h); ctx.closePath(); ctx.stroke();
-      }
+      this.drawGred(ctx);
       // エリア描画
-      for (const r of this.areaRect) {
-        if (r.ishide === false) {
-          ctx.fillStyle = r.color;
-          ctx.fillRect(r.x, r.y, r.w, r.h);
-        }
-      }
+      this.drawArea(ctx);
       // エリア選択ライン描画
-      for (const l of this.areaLine) {
-        if (l.ishide === false) {
-          ctx.lineWidth = l.lw;
-          ctx.strokeStyle = l.color;
-          if (l.isMove === true) {
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-            ctx.shadowBlur = 5;
-            ctx.shadowOffsetX = 5;
-            ctx.shadowOffsetY = 5;
-          }
-          ctx.beginPath();
-          ctx.moveTo(l.x1 + l.ox, l.y1 + l.oy);
-          ctx.lineTo(l.x2 + l.ox, l.y2 + l.oy);
-          ctx.closePath();
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-          ctx.shadowOffsetX = 0;
-          ctx.shadowOffsetY = 0;
-        }
-      }
+      this.drawAreaLine(ctx);
     }
+  }
+
+  public yLineOffsetX(l: { ox: number; x1: number; }, x: number, min: number, max: number): number {
+    l.ox = x - l.x1;
+    // console.log(l.ox);
+    // console.log('max:' + max);
+    // console.log('min:' + min);
+    if ( min > l.ox ) {
+      l.ox = min;
+    } else if ( l.ox > max ) {
+      l.ox = max;
+    }
+    // console.log(l.ox);
+    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
+    return(l.ox);
   }
 
   // 縦上
   public yuMove(l, x) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const w2 = this.w / 2;
+    let min = 0;
+    let max = 0;
 
-    l.ox = x - l.x1;
-    if ((-w2) > l.ox) {
-      l.ox = -w2;
-    } else if (l.ox > (w2)) {
-      l.ox = w2;
+    if ( this.areaNum === 1 ) {
+      // 非表示のため処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      } else {
+        // 非表示のため処理無し
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        // 非表示のため処理無し
+      } else if ( this.rotation === 1 ) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      } else if ( this.rotation === 3 ) {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+
+      }
+    } else {
+      if (this.isXline === true) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox ) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+        min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        max = w2 + ( this.areaLine[2].ox - this.gridx);
+      }
     }
-    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
+
+    const ox =  this.yLineOffsetX(l, x, min , max );
     if (this.isXline === true) {
-      this.areaLine[8].ox = l.ox;
-      this.areaLine[9].ox = l.ox;
-      this.areaLine[10].x2 = (w2) + l.ox;
-      this.areaLine[11].x1 = (w2) + l.ox;
-      this.areaLine[5].x2 = (w2) + l.ox;
-      this.areaLine[7].x1 = (w2) + l.ox;
+      this.areaLine[8].ox = ox;
+      this.areaLine[10].x2 = (w2) + ox;
+      this.areaLine[11].x1 = (w2) + ox;
+      this.areaLine[5].x2 = (w2) + ox;
+      this.areaLine[7].x1 = (w2) + ox;
     }
-    this.areaLine[4].x2 = (w2) + l.ox;
-    this.areaLine[6].x1 = (w2) + l.ox;
+    this.areaLine[4].x2 = (w2) + ox;
+    this.areaLine[6].x1 = (w2) + ox;
   }
   // 縦下
   public ylMove(l, x) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const w2 = this.w / 2;
+    let max = 0;
+    let min = 0;
 
-    l.ox = x - l.x1;
-    if ((-this.w / 2) > l.ox) {
-      l.ox = -this.w / 2;
-    } else if (l.ox > (this.w / 2)) {
-      l.ox = this.w / 2;
+    if ( this.areaNum === 1 ) {
+      // 非表示のため処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      } else {
+        // 非表示のため処理無し
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      } else if ( this.rotation === 1 ) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        // 非表示のため処理なし
+      } else if ( this.rotation === 3 ) {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+
+      }
+    } else {
+      if (this.isXline === true) {
+        if ( this.areaLine[0].ox > this.areaLine[1].ox ) {
+          min = - w2  + ( this.areaLine[0].ox + this.gridx);
+        } else {
+          min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        }
+        if ( this.areaLine[2].ox < this.areaLine[3].ox ) {
+          max = w2 + ( this.areaLine[2].ox - this.gridx);
+        } else {
+          max = w2 + ( this.areaLine[3].ox - this.gridx);
+        }
+      } else {
+        min = - w2  + ( this.areaLine[1].ox + this.gridx);
+        max = w2 + ( this.areaLine[3].ox - this.gridx);
+      }
+
     }
-    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
+
+    const ox =  this.yLineOffsetX(l, x, min , max );
     if (this.isXline === true) {
-      this.areaLine[8].ox = l.ox;
-      this.areaLine[9].ox = l.ox;
-      this.areaLine[10].x2 = (w2) + l.ox;
-      this.areaLine[11].x1 = (w2) + l.ox;
-      this.areaLine[4].x2 = (w2) + l.ox;
-      this.areaLine[6].x1 = (w2) + l.ox;
+      this.areaLine[9].ox = ox;
+      this.areaLine[10].x2 = (w2) + ox;
+      this.areaLine[11].x1 = (w2) + ox;
+      this.areaLine[4].x2 = (w2) + ox;
+      this.areaLine[6].x1 = (w2) + ox;
     }
-    this.areaLine[5].x2 = (w2) + l.ox;
-    this.areaLine[7].x1 = (w2) + l.ox;
+    this.areaLine[5].x2 = (w2) + ox;
+    this.areaLine[7].x1 = (w2) + ox;
   }
 
+  public sameBlankLineY( line , num2R, num3R , ox) {
+    if ( this.areaNum === 1 ) {
+      this.areaLine[line].ox = ox;
+    } else if ((this.areaNum === 2) && (this.rotation === num2R )) {
+      this.areaLine[line].ox = ox;
+    } else if ((this.areaNum === 3) && (this.rotation === num3R )) {
+      this.areaLine[line].ox = ox;
+    }
+  }
+
+  // ブランクLine
   // 縦左上
   public yluMove(l, x) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const w0 = 0; const w2 = this.w / 2;
+    const min: number = -w0;
+    let max: number;
+    if ( this.areaNum === 1 ) {
+      max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
+        max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[2].x1 + this.areaLine[2].ox - this.gridx;
+      } else if ( this.rotation === 1 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 3 ) {
+        max = this.areaLine[8].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
 
-    l.ox = x - l.x1;
-    if ((w0) > l.ox) {
-      l.ox = w0;
-    } else if (l.ox > w1) {
-      l.ox = w1;
+      }
+    } else {
+      max = w2 + (this.areaLine[8].ox - this.gridx);
     }
-    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
-
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[1].ox = l.ox;
-        break;
-      case 2:
-        if (this.rotation === 0) {
-          this.areaLine[1].ox = l.ox;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-        } else if (this.rotation === 1) {
-        } else if (this.rotation === 2) {
-        } else {
-          this.areaLine[1].ox = l.ox;
-        }
-        break;
-      case 4:
-        break;
-    }
-
+    const ox =  this.yLineOffsetX(l, x, min, max);
+    this.sameBlankLineY( 1 , 0 , 3 , ox);
   }
 
-  // 縦左上
+  // 縦左下
   public yllMove(l, x) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const w0 = 0; const w2 = this.w / 2;
+    const min = - w0;
+    let max: number;
+    if ( this.areaNum === 1 ) {
+      max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
+        max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 1 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[3].x1 + this.areaLine[3].ox - this.gridx;
+      } else if ( this.rotation === 3 ) {
+        max = this.areaLine[9].x1 + (this.areaLine[8].ox - this.gridx);
+      } else {
 
-    l.ox = x - l.x1;
-    if ((w0) > l.ox) {
-      l.ox = w0;
-    } else if (l.ox > w1) {
-      l.ox = w1;
+      }
+    } else {
+      max = w2 + (this.areaLine[9].ox - this.gridx);
     }
-    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[0].ox = l.ox;
-        break;
-      case 2:
-        if (this.rotation === 0) {
-          this.areaLine[0].ox = l.ox;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-        } else if (this.rotation === 1) {
-        } else if (this.rotation === 2) {
-        } else {
-          this.areaLine[0].ox = l.ox;
-        }
-        break;
-      case 4:
-        break;
-    }
+    const ox =  this.yLineOffsetX(l, x, min, max);
+    this.sameBlankLineY( 0 , 0 , 3 , ox);
   }
 
+  // 縦右上
   public yruMove(l, x) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const w0 = 0; const w2 = this.w / 2; const w1 = this.w;
+    let min: number;
+    const max = w0;
 
-    l.ox = x - l.x1;
-    if ((w0) < l.ox) {
-      l.ox = w0;
-    } else if (l.ox < -w1) {
-      l.ox = -w1;
+    if ( this.areaNum === 1 ) {
+      min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else {
+        min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = -w1 + (this.areaLine[0].x1 + this.areaLine[0].ox) + this.gridx;
+      } else if ( this.rotation === 1 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else if ( this.rotation === 2 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else if ( this.rotation === 3 ) {
+        min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
+      } else {
+
+      }
+    } else {
+      min = - this.areaLine[8].x1 + ( this.areaLine[8].ox + this.gridx);
     }
-    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[3].ox = l.ox;
-        break;
-      case 2:
-        if (this.rotation === 0) {
-          this.areaLine[3].ox = l.ox;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-        } else if (this.rotation === 1) {
-          this.areaLine[3].ox = l.ox;
-        } else if (this.rotation === 2) {
-        } else {
-        }
-        break;
-      case 4:
-        break;
-    }
+
+    const ox =  this.yLineOffsetX(l, x, min, max);
+    this.sameBlankLineY( 3 , 0 , 1 , ox);
   }
 
   public yrlMove(l, x) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const w0 = 0; const w2 = this.w / 2; const w1 = this.w;
+    let min: number;
+    const max = w0;
 
-    l.ox = x - l.x1;
-    if ((w0) < l.ox) {
-      l.ox = w0;
-    } else if (l.ox < -w1) {
-      l.ox = -w1;
+    if ( this.areaNum === 1 ) {
+      min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else {
+        min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else if ( this.rotation === 1 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else if ( this.rotation === 2 ) {
+        min = -w1 + (this.areaLine[1].x1 + this.areaLine[1].ox) + this.gridx;
+      } else if ( this.rotation === 3 ) {
+        min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
+      } else {
+
+      }
+    } else {
+      min = - this.areaLine[9].x1 + ( this.areaLine[9].ox + this.gridx);
     }
-    l.ox = Math.round(l.ox / this.gridx) * this.gridx;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[2].ox = l.ox;
-        break;
-      case 2:
-        if (this.rotation === 0) {
-          this.areaLine[2].ox = l.ox;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-        } else if (this.rotation === 1) {
-          this.areaLine[2].ox = l.ox;
-        } else if (this.rotation === 2) {
-        } else {
-        }
-        break;
-      case 4:
-        break;
+
+    const ox =  this.yLineOffsetX(l, x, min, max);
+    this.sameBlankLineY( 2 , 0 , 1 , ox);
+  }
+
+  public xLineOffsetY(l: { oy: number; y1: number; }, x: number, min: number, max: number): number {
+    l.oy = x - l.y1;
+    if ( min > l.oy ) {
+      l.oy = min;
+    } else if ( l.oy > max ) {
+      l.oy = max;
     }
+    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
+    return(l.oy);
   }
 
   public xlMove(l, y) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const h2 = this.h / 2;
 
-    l.oy = y - l.y1;
-    if ((-this.h / 2) > l.oy) {
-      l.oy = -this.h / 2;
-    } else if (l.oy > (this.h / 2)) {
-      l.oy = this.h / 2;
+    let min = 0;
+    let max = 0;
+
+    if ( this.areaNum === 1 ) {
+      // 処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+        // 非表示のため処理なし
+      } else {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        max = h2 + ( this.areaLine[5].oy - this.gridy);
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else if ( this.rotation === 1 ) {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        max = h2 + ( this.areaLine[5].oy - this.gridy);
+      } else if ( this.rotation === 2 ) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      } else if ( this.rotation === 3 ) {
+        // 非表示のため処理なし
+      } else {
+
+      }
+    } else {
+      if (this.isYline === true) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else {
+        min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        max = h2 + ( this.areaLine[5].oy - this.gridy);
+      }
     }
-    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
+
+    const oy =  this.xLineOffsetY(l, y, min, max);
     if (this.isYline === true) {
-      this.areaLine[8].y2 = (this.h / 2) + l.oy;
-      this.areaLine[9].y1 = (this.h / 2) + l.oy;
-      this.areaLine[10].oy = l.oy;
-      this.areaLine[11].oy = l.oy;
-      this.areaLine[2].y2 = (this.h / 2) + l.oy;
-      this.areaLine[3].y1 = (this.h / 2) + l.oy;
+      this.areaLine[8].y2 = (h2) + oy;
+      this.areaLine[9].y1 = (h2) + oy;
+      this.areaLine[10].oy = oy;
+      this.areaLine[11].oy = oy;
+      this.areaLine[2].y2 = (h2) + oy;
+      this.areaLine[3].y1 = (h2) + oy;
     }
-    this.areaLine[0].y2 = (this.h / 2) + l.oy;
-    this.areaLine[1].y1 = (this.h / 2) + l.oy;
+    this.areaLine[0].y2 = (h2) + oy;
+    this.areaLine[1].y1 = (h2) + oy;
   }
 
   public xrMove(l, y) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const h2 = this.h / 2;
+    let min = 0;
+    let max = 0;
 
-    l.oy = y - l.y1;
-    if ((-this.h / 2) > l.oy) {
-      l.oy = -this.h / 2;
-    } else if (l.oy > (this.h / 2)) {
-      l.oy = this.h / 2;
+    if ( this.areaNum === 1 ) {
+      // 処理無し
+    } else if (this.areaNum === 2) {
+      if (this.rotation === 0 ) {
+
+      } else {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      }
+    } else if (this.areaNum === 3) {
+      if (this.rotation === 0 ) {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else if ( this.rotation === 1 ) {
+        // 非表示のため処理なし
+      } else if ( this.rotation === 2 ) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      } else if ( this.rotation === 3 ) {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      } else {
+
+      }
+    } else {
+      if (this.isYline === true) {
+        if ( this.areaLine[4].oy > this.areaLine[6].oy) {
+          min = - h2  + ( this.areaLine[4].oy + this.gridy);
+        } else {
+          min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        }
+        if ( this.areaLine[5].oy < this.areaLine[7].oy ) {
+          max = h2 + ( this.areaLine[5].oy - this.gridy);
+        } else {
+          max = h2 + ( this.areaLine[7].oy - this.gridy);
+        }
+      } else {
+        min = - h2  + ( this.areaLine[6].oy + this.gridy);
+        max = h2 + ( this.areaLine[7].oy - this.gridy);
+      }
     }
-    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
+    const oy =  this.xLineOffsetY(l, y, min, max);
     if (this.isYline === true) {
-      this.areaLine[8].y2 = (this.h / 2) + l.oy;
-      this.areaLine[9].y1 = (this.h / 2) + l.oy;
-      this.areaLine[10].oy = l.oy;
-      this.areaLine[11].oy = l.oy;
-      this.areaLine[0].y2 = (this.h / 2) + l.oy;
-      this.areaLine[1].y1 = (this.h / 2) + l.oy;
+      this.areaLine[8].y2 = (h2) + oy;
+      this.areaLine[9].y1 = (h2) + oy;
+      this.areaLine[10].oy = oy;
+      this.areaLine[11].oy = oy;
+      this.areaLine[0].y2 = (h2) + oy;
+      this.areaLine[1].y1 = (h2) + oy;
     }
-    this.areaLine[2].y2 = (this.h / 2) + l.oy;
-    this.areaLine[3].y1 = (this.h / 2) + l.oy;
+    this.areaLine[2].y2 = (h2) + oy;
+    this.areaLine[3].y1 = (h2) + oy;
   }
 
+
+  public sameBlankLineX( line , num2R, num3R , oy) {
+    if ( this.areaNum === 1 ) {
+      this.areaLine[line].oy = oy;
+    } else if ((this.areaNum === 2) && (this.rotation === num2R )) {
+      this.areaLine[line].oy = oy;
+    } else if ((this.areaNum === 3) && (this.rotation === num3R )) {
+      this.areaLine[line].oy = oy;
+    }
+  }
+
+  // 横左上(4)
   public xluMove(l, y) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const h0 = 0 ; const h1 = this.h; const h2 = this.h / 2;
+    const min = h0;
+    let max: number;
 
-    l.oy = y - l.y1;
-    if (h0 > l.oy) {
-      l.oy = h0;
-    } else if (l.oy > h1) {
-      l.oy = h1;
+    if ( this.areaNum === 1 ) {
+      max = (this.areaLine[5].y1 + this.areaLine[5].oy) - this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = (this.areaLine[5].y1 + this.areaLine[5].oy) - this.gridy;
+      } else {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      } else if ( this.rotation === 1 ) {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
+      } else if ( this.rotation === 3 ) {
+        max = (this.areaLine[5].y1 + this.areaLine[5].oy) - this.gridy;
+      } else {
+
+      }
+    } else {
+      max = this.areaLine[10].y1 + this.areaLine[10].oy - this.gridy;
     }
-    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[6].oy = l.oy;
-        break;
-      case 2:
-        if (this.rotation === 1) {
-          this.areaLine[6].oy = l.oy;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-          this.areaLine[6].oy = l.oy;
-        } else if (this.rotation === 1) {
-        } else if (this.rotation === 2) {
-        } else {
-        }
-        break;
-      case 4:
-        break;
-    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
+    this.sameBlankLineX( 6 , 1 , 0 , oy);
   }
 
+  // 横左下(5)
   public xllMove(l, y) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const h0 = 0 ; const h1 = this.h;
+    let min: number;
+    const max = h0;
+    if ( this.areaNum === 1 ) {
+      min = -h1 + (this.areaLine[4].y1 + this.areaLine[4].oy) + this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if ( this.rotation === 0 ) {
+        min = -h1 + (this.areaLine[4].y1 + this.areaLine[4].oy) + this.gridy;
+      } else {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      } else if ( this.rotation === 1 ) {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      } else if ( this.rotation === 2 ) {
+        min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
+      } else if ( this.rotation === 3 ) {
+        min = -h1 + (this.areaLine[4].y1 + this.areaLine[4].oy) + this.gridy;
+      } else {
 
-    l.oy = y - l.y1;
-    if (h0 < l.oy) {
-      l.oy = h0;
-    } else if (l.oy < -h1) {
-      l.oy = -h1;
+      }
+    } else {
+      min = -(this.areaLine[10].y1) + this.areaLine[10].oy + this.gridy;
     }
-    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[7].oy = l.oy;
-        break;
-      case 2:
-        if (this.rotation === 1) {
-          this.areaLine[7].oy = l.oy;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-        } else if (this.rotation === 1) {
-        } else if (this.rotation === 2) {
-          this.areaLine[7].oy = l.oy;
-        } else {
-        }
-        break;
-      case 4:
-        break;
-    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
+    this.sameBlankLineX( 7 , 1 , 2 , oy);
   }
+
+  // 横右上(6)
   public xruMove(l, y) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const h0 = 0 ; const h1 = this.h; const h2 = this.h / 2;
+    const min = h0;
+    let max: number;
 
-    l.oy = y - l.y1;
-    if (h0 > l.oy) {
-      l.oy = h0;
-    } else if (l.oy > h1) {
-      l.oy = h1;
+    if ( this.areaNum === 1 ) {
+      max = (this.areaLine[7].y1 + this.areaLine[7].oy) - this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if (this.rotation === 0 ) {
+        max = (this.areaLine[7].y1 + this.areaLine[7].oy) - this.gridy;
+      } else {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      } else if ( this.rotation === 1 ) {
+        max = (this.areaLine[7].y1 + this.areaLine[7].oy) - this.gridy;
+      } else if ( this.rotation === 2 ) {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      } else if ( this.rotation === 3 ) {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      } else {
+        max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
+      }
+    } else {
+      max = this.areaLine[11].y1 + this.areaLine[11].oy - this.gridy;
     }
-    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[4].oy = l.oy;
-        break;
-      case 2:
-        if (this.rotation === 1) {
-          this.areaLine[4].oy = l.oy;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-          this.areaLine[4].oy = l.oy;
-        } else if (this.rotation === 1) {
-        } else if (this.rotation === 2) {
-        } else {
-        }
-        break;
-      case 4:
-        break;
-    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
+    this.sameBlankLineX( 4 , 1 , 0 , oy);
   }
+  // 横右下(7)
   public xrlMove(l, y) {
-    const w0 = 0; const w1 = this.w; const w2 = this.w / 2;
-    const h0 = 0; const h1 = this.h; const h2 = this.h / 2;
+    const h0 = 0 ; const h1 = this.h;
+    let min: number;
+    const max = h0;
+    if ( this.areaNum === 1 ) {
+      min = -h1 + (this.areaLine[6].y1 + this.areaLine[6].oy) + this.gridy;
+    } else if ( this.areaNum === 2 ) {
+      if ( this.rotation === 0 ) {
+        min = -h1 + (this.areaLine[6].y1 + this.areaLine[6].oy) + this.gridy;
+      } else {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      }
+    } else if ( this.areaNum === 3 ) {
+      if (this.rotation === 0 ) {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      } else if ( this.rotation === 1 ) {
+        min = -h1 + (this.areaLine[6].y1 + this.areaLine[6].oy) + this.gridy;
+      } else if ( this.rotation === 2 ) {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      } else if ( this.rotation === 3 ) {
+        min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
+      } else {
 
-    l.oy = y - l.y1;
-    if (h0 < l.oy) {
-      l.oy = h0;
-    } else if (l.oy < -h1) {
-      l.oy = -h1;
+      }
+    } else {
+      min = -(this.areaLine[11].y1) + this.areaLine[11].oy + this.gridy;
     }
-    l.oy = Math.round(l.oy / this.gridy) * this.gridy;
-    switch (this.areaNum) {
-      case 1:
-        this.areaLine[5].oy = l.oy;
-        break;
-      case 2:
-        if (this.rotation === 1) {
-          this.areaLine[5].oy = l.oy;
-        }
-        break;
-      case 3:
-        if (this.rotation === 0) {
-        } else if (this.rotation === 1) {
-        } else if (this.rotation === 2) {
-          this.areaLine[5].oy = l.oy;
-        } else {
-        }
-        break;
-      case 4:
-        break;
-    }
+    const oy =  this.xLineOffsetY(l, y, min, max);
+    this.sameBlankLineX( 5 , 1 , 2 , oy);
   }
+
 
   public touchMove(event) {
     event.preventDefault();
@@ -450,50 +937,50 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const touchX = Math.round(event.changedTouches[0].pageX);
     const touchY = Math.round(event.changedTouches[0].pageY);
     // // 要素内におけるタッチ位置を計算
-    const x = touchX - rect.left;
-    const y = touchY - rect.top;
+    const x = touchX - rect.left - this.offsetX;
+    const y = touchY - rect.top - this.offsetY;
 
     for (const l of this.areaLine) {
-      if (l.isMove === true && l.ishide === false) {
+      if (l.isMove === true && l.isHide === false) {
         if (l.x1 === l.x2) {   // 縦線
-          switch (l.name) {
-            case '8': // 縦上
+          switch (l.n) {
+            case 8: // 縦上
               this.yuMove(l, x);
               break;
-            case '9': // 縦下
+            case 9: // 縦下
               this.ylMove(l, x);
               break;
-            case '0': // 0:縦左上
+            case 0: // 0:縦左上
               this.yluMove(l, x);
               break;
-            case '1': // 1:縦左下
+            case 1: // 1:縦左下
               this.yllMove(l, x);
               break;
-            case '2': // 2:縦右上
+            case 2: // 2:縦右上
               this.yruMove(l, x);
               break;
-            case '3': // 3:縦右下
+            case 3: // 3:縦右下
               this.yrlMove(l, x);
               break;
           }
         } else {              // 横線
-          switch (l.name) {
-            case '10':  // 横左
+          switch (l.n) {
+            case 10:  // 横左
               this.xlMove(l, y);
               break;
-            case '11':  // 横右
+            case 11:  // 横右
               this.xrMove(l, y);
               break;
-            case '4': // 4:横左上
+            case 4: // 4:横左上
               this.xluMove(l, y);
               break;
-            case '5': // 5:横左下
+            case 5: // 5:横左下
               this.xllMove(l, y);
               break;
-            case '6': // 6:横右上
+            case 6: // 6:横右上
               this.xruMove(l, y);
               break;
-            case '7': // 7:横右下
+            case 7: // 7:横右下
               this.xrlMove(l, y);
               break;
           }
@@ -507,122 +994,81 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     this.draw();
   }
 
-  public touchStart(event) {
-    const rect = event.target.getBoundingClientRect();
-    const touchX = Math.round(event.changedTouches[0].pageX);
-    const touchY = Math.round(event.changedTouches[0].pageY);
-    // 要素内におけるタッチ位置を計算
-    const x = touchX - rect.left;
-    const y = touchY - rect.top;
-    // console.log(this);
+  public areaTouchStart(x: number , y: number ): boolean {
+    for (const r of this.areaRect ) {
+      if ( r.isHide === false ) {
+        if ( (r.x < x ) && ( x < (r.x + r.w)) ) {
+          if ( (r.y < y ) && ( y < (r.y + r.h)) ) {
+            r.isTouch = true;
+            return(true);
+          }
+        }
+      }
+    }
+    return(false);
+  }
+
+
+  public lineTouchStart(x: number, y: number): boolean {
+    let isTouch = false;
+
     // ライン上のタッチイベントかをチェックする
     for (const l of this.areaLine) {
-      if (l.ishide === false) {
+      if (l.isHide === false && l.isDragEnable === true) {
         // 縦線か横線かのチェック
         if (l.x1 === l.x2) {   // 縦線
           // console.log('tapx ' + 'X:', l.x1 + l.ox + ' Y:', y);
           if ((((l.x1 + l.ox - this.touchsize) < x) && (x < (l.x1 + l.ox + this.touchsize))) && ((l.y1 < y) && (y < l.y2))) {
-            if ((l.name === '8') || (l.name === '9')) {
+            if ((l.n === 8) || (l.n === 9)) {
               this.istapX = true;
             }
             l.isMove = true;
-            switch (l.name) {
-              case '8': // 縦上
+            isTouch = true;
+            switch (l.n) {
+              case 8: // 縦上
                 if (this.isXline === true) {
                   this.areaLine[9].isMove = true;
                 }
                 break;
-              case '9': // 縦下
+              case 9: // 縦下
                 if (this.isXline === true) {
                   this.areaLine[8].isMove = true;
                 }
                 break;
-              case '0': // 0:縦左上
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[1].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 0) {
-                      this.areaLine[1].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                    } else if (this.rotation === 1) {
-                    } else if (this.rotation === 2) {
-                    } else {
-                      this.areaLine[1].isMove = true;
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 0: // 0:縦左上
+                if (this.areaNum === 1) {
+                  this.areaLine[1].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 0)) {
+                  this.areaLine[1].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 3)) {
+                  this.areaLine[1].isMove = true;
                 }
                 break;
-              case '1': // 1:縦左下
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[0].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 0) {
-                      this.areaLine[0].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                    } else if (this.rotation === 1) {
-                    } else if (this.rotation === 2) {
-                    } else {
-                      this.areaLine[0].isMove = true;
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 1: // 1:縦左下
+                if (this.areaNum === 1) {
+                  this.areaLine[0].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 0)) {
+                  this.areaLine[0].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 3)) {
+                  this.areaLine[0].isMove = true;
                 }
                 break;
-              case '2': // 2:縦右上
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[3].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 0) {
-                      this.areaLine[3].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                    } else if (this.rotation === 1) {
-                      this.areaLine[3].isMove = true;
-                    } else if (this.rotation === 2) {
-                    } else {
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 2: // 2:縦右上
+                if (this.areaNum === 1) {
+                  this.areaLine[3].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 0)) {
+                  this.areaLine[3].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 1)) {
+                  this.areaLine[3].isMove = true;
                 }
                 break;
-              case '3': // 3:縦右下
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[2].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 0) {
-                      this.areaLine[2].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                    } else if (this.rotation === 1) {
-                      this.areaLine[2].isMove = true;
-                    } else if (this.rotation === 2) {
-                    } else {
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 3: // 3:縦右下
+                if (this.areaNum === 1) {
+                  this.areaLine[2].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 0)) {
+                  this.areaLine[2].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 1)) {
+                  this.areaLine[2].isMove = true;
                 }
                 break;
             }
@@ -630,107 +1076,56 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           }
         } else {  // 横線
           if ((((l.y1 + l.oy - this.touchsize) < y) && (y < (l.y1 + l.oy + this.touchsize))) && ((l.x1 < x) && (x < l.x2))) {
-            if ((l.name === '10') || (l.name === '11')) {
+            if ((l.n === 10) || (l.n === 11)) {
               this.istapY = true;
             }
             l.isMove = true;
-            switch (l.name) {
-              case '10':  // 横左
+            isTouch = true;
+            switch (l.n) {
+              case 10:  // 横左
                 if (this.isYline === true) {
                   this.areaLine[11].isMove = true;
                 }
                 break;
-              case '11':  // 横右
+              case 11:  // 横右
                 if (this.isYline === true) {
                   this.areaLine[10].isMove = true;
                 }
                 break;
-              case '4': // 4:横左上
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[6].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 1) {
-                      this.areaLine[6].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                      this.areaLine[6].isMove = true;
-                    } else if (this.rotation === 1) {
-                    } else if (this.rotation === 2) {
-                    } else {
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 4: // 4:横左上
+                if (this.areaNum === 1) {
+                  this.areaLine[6].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 1)) {
+                  this.areaLine[6].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 0)) {
+                  this.areaLine[6].isMove = true;
                 }
                 break;
-              case '5': // 5:横左下
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[7].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 1) {
-                      this.areaLine[7].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                    } else if (this.rotation === 1) {
-                    } else if (this.rotation === 2) {
-                      this.areaLine[7].isMove = true;
-                    } else {
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 5: // 5:横左下
+                if (this.areaNum === 1) {
+                  this.areaLine[7].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 1)) {
+                  this.areaLine[7].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 2)) {
+                  this.areaLine[7].isMove = true;
                 }
                 break;
-              case '6': // 6:横右上
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[4].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 1) {
-                      this.areaLine[4].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                      this.areaLine[4].isMove = true;
-                    } else if (this.rotation === 1) {
-                    } else if (this.rotation === 2) {
-                    } else {
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 6: // 6:横右上
+                if (this.areaNum === 1) {
+                  this.areaLine[4].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 1)) {
+                  this.areaLine[4].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 0)) {
+                  this.areaLine[4].isMove = true;
                 }
                 break;
-              case '7': // 7:横右下
-                switch (this.areaNum) {
-                  case 1:
-                    this.areaLine[5].isMove = true;
-                    break;
-                  case 2:
-                    if (this.rotation === 1) {
-                      this.areaLine[5].isMove = true;
-                    }
-                    break;
-                  case 3:
-                    if (this.rotation === 0) {
-                    } else if (this.rotation === 1) {
-                    } else if (this.rotation === 2) {
-                      this.areaLine[5].isMove = true;
-                    } else {
-                    }
-                    break;
-                  case 4:
-                    break;
+              case 7: // 7:横右下
+                if (this.areaNum === 1) {
+                  this.areaLine[5].isMove = true;
+                } else if ((this.areaNum === 2) && (this.rotation === 1)) {
+                  this.areaLine[5].isMove = true;
+                } else if ((this.areaNum === 3) && (this.rotation === 2)) {
+                  this.areaLine[5].isMove = true;
                 }
                 break;
             }
@@ -738,6 +1133,21 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
           }
         }
       }
+    }
+    return(isTouch);
+  }
+
+
+
+  public touchStart(event) {
+    const rect = event.target.getBoundingClientRect();
+    const touchX = Math.round(event.changedTouches[0].pageX);
+    const touchY = Math.round(event.changedTouches[0].pageY);
+    // 要素内におけるタッチ位置を計算
+    const x = touchX - rect.left - this.offsetX;
+    const y = touchY - rect.top - this.offsetY;
+    if ( this.lineTouchStart(x , y ) === true) {
+    } else if ( this.areaTouchStart(x, y) === true) {
     }
     this.draw();
   }
@@ -748,12 +1158,35 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const touchX = Math.round(event.changedTouches[0].pageX);
     const touchY = Math.round(event.changedTouches[0].pageY);
     // 要素内におけるタッチ位置を計算
-    const x = touchX - rect.left;
-    const y = touchY - rect.top;
+    const x = touchX - rect.left - this.offsetX;
+    const y = touchY - rect.top - this.offsetY;
     // console.log(this);
+    // エリアタッチの検出
+    let isTouch = false;
+    for (const r of this.areaRect ) {
+      console.log(r);
+      if ( r.isHide === false && r.isTouch === true ) {
+        if ( (r.x < x ) && ( x < (r.x + r.w)) && (r.y < y ) && ( y < (r.y + r.h)) ) {
+          if ( r.area === 0 ) {
+            console.log(r);
+            r.area = this.inDoorMode;
+            isTouch = true;
+          }
+        }
+      }
+    }
+    if ( isTouch === true ) {
+      for (const r of this.areaRect ) {
+        if ( r.isHide === false && r.isTouch === false ) {
+          if ( r.area === this.inDoorMode ) {
+          r.area = 0;
+          }
+        }
+      }
+    }
     // ライン上のタッチイベントかをチェックする
     for (const l of this.areaLine) {
-      if (l.ishide === false) {
+      if (l.isHide === false) {
         // 縦線か横線かのチェック
         if (l.x1 === l.x2) {   // 縦線
           if ((((l.x1 + l.ox - this.touchsize) < x) && (x < (l.x1 + l.ox + this.touchsize))) && ((l.y1 < y) && (y < l.y2))) {
@@ -779,6 +1212,9 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     for (const l of this.areaLine) {
       l.isMove = false;
     }
+    for (const r of this.areaRect) {
+      r.isTouch = false;
+    }
     this.draw();
   }
 
@@ -792,9 +1228,6 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     } else {
       this.areaNum4XTap();
     }
-    // this.textArea();
-    // this.rectArea();
-    // this.layer.getStage().draw();
   }
 
   public handleTapY() {
@@ -806,9 +1239,6 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     } else {
       this.areaNum4YTap();
     }
-    // this.textArea();
-    // this.rectArea();
-    // this.layer.getStage().draw();
   }
 
   public setAreaRect(num: number, x: number, y: number, w: number, h: number) {
@@ -818,7 +1248,29 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     this.areaRect[num].h = h;
   }
 
+  public setAreaRectColor(num: number, area: number , isHide: boolean, x: number, y: number, w: number, h: number) {
+    this.areaRect[num].area = area;
+    this.areaRect[num].isHide = isHide;
+    this.areaRect[num].x = x;
+    this.areaRect[num].y = y;
+    this.areaRect[num].w = w;
+    this.areaRect[num].h = h;
+  }
 
+  public setAreaLine(num: number , isHide: boolean , x1: number , y1: number , x2: number , y2: number) {
+    this.areaLine[num].isHide = isHide;
+    this.areaLine[num].x1 = x1;
+    this.areaLine[num].y1 = y1;
+    this.areaLine[num].x2 = x2;
+    this.areaLine[num].y2 = y2;
+  }
+
+  public areaLineHide(isline8: boolean, isline9: boolean, isline10: boolean, isline11: boolean) {
+    this.areaLine[8].isHide = isline8;
+    this.areaLine[9].isHide = isline9;
+    this.areaLine[10].isHide = isline10;
+    this.areaLine[11].isHide = isline11;
+  }
   // エリア数 2 の時のタップ処理
   public areaNum2Tap() {
     const w0 = 0;
@@ -828,50 +1280,38 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const h1 = this.h;
     const h2 = this.h / 2;
 
+    this.setAreaLine(0, false , w0, h0, w0, h2);
+    this.setAreaLine(1, false , w0, h2, w0, h1);
+    this.setAreaLine(2, false , w1, h0, w1, h2);
+    this.setAreaLine(3, false , w1, h2, w1, h1);
+    this.setAreaLine(4, false , w0, h0, w2, h0);
+    this.setAreaLine(5, false , w0, h1, w2, h1);
+    this.setAreaLine(6, false , w2, h0, w1, h0);
+    this.setAreaLine(7, false , w2, h1, w1, h1);
+    this.setAreaLine(8, false , w2, h0, w2, h2);
+    this.setAreaLine(9, false , w2, h2, w2, h1);
+    this.setAreaLine(10, false , w0, h2, w2, h2);
+    this.setAreaLine(11, false , w2, h2, w1, h2);
+
     if (this.rotation === 0) {
       this.rotation = 1;
       // 縦→横変換
       // エリア表示
       this.setAreaRect(0, w0, h0, w1, h2);
       this.setAreaRect(1, w0, h2, w1, h2);
-
       // エリア設定ライン
-      this.areaLine[8].ishide = true;
-      this.areaLine[9].ishide = true;
-      this.areaLine[10].ishide = false;
-      this.areaLine[11].ishide = false;
-
-      // テキスト表示
-      // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 2 - 10, y: (this.canvasHeight / 4) * 1 - 10 });
-      // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 2 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
+      this.areaLineHide(true , true , false , false);
     } else {
       this.rotation = 0;
       // 横→縦
       this.setAreaRect(0, w0, h0, w2, h1);
       this.setAreaRect(1, w2, h0, w2, h1);
-
       // エリア設定ライン
-      this.areaLine[8].ishide = false;
-      this.areaLine[9].ishide = false;
-      this.areaLine[10].ishide = true;
-      this.areaLine[11].ishide = true;
-
-      // テキスト表示
-      // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
-      // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
+      this.areaLineHide(false, false, true, true);
     }
     for (const l of this.areaLine) {
-      switch (l.name) {
-        case '8':
-        case '9':
-        case '10':
-        case '11':
-          break;
-        default:
-          l.ox = 0;
-          l.oy = 0;
-          break;
-      }
+      l.ox = 0;
+      l.oy = 0;
     }
     this.rectArea();
   }
@@ -885,89 +1325,56 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const h1 = this.h;
     const h2 = this.h / 2;
 
+
+    this.setAreaLine(0, false , w0, h0, w0, h2);
+    this.setAreaLine(1, false , w0, h2, w0, h1);
+    this.setAreaLine(2, false , w1, h0, w1, h2);
+    this.setAreaLine(3, false , w1, h2, w1, h1);
+    this.setAreaLine(4, false , w0, h0, w2, h0);
+    this.setAreaLine(5, false , w0, h1, w2, h1);
+    this.setAreaLine(6, false , w2, h0, w1, h0);
+    this.setAreaLine(7, false , w2, h1, w1, h1);
+    this.setAreaLine(8, false , w2, h0, w2, h2);
+    this.setAreaLine(9, false , w2, h2, w2, h1);
+    this.setAreaLine(10, false , w0, h2, w2, h2);
+    this.setAreaLine(11, false , w2, h2, w1, h2);
+
     if (this.rotation === 0) {
       this.rotation = 1;
       // エリア表示
       this.setAreaRect(0, w0, h0, w2, h2);
       this.setAreaRect(1, w2, h0, w2, h1);
       this.setAreaRect(2, w0, h2, w2, h2);
-
       // // エリア設定ライン
-      this.areaLine[8].ishide = false;
-      this.areaLine[9].ishide = false;
-      this.areaLine[10].ishide = false;
-      this.areaLine[11].ishide = true;
-
-      // テキスト表示
-      // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 1 - 10 });
-      // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
-      // this.ta3.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
-
+      this.areaLineHide(false, false , false , true);
     } else if (this.rotation === 1) {
       this.rotation = 2;
       // // エリア表示
       this.setAreaRect(0, w0, h0, w2, h2);
       this.setAreaRect(1, w2, h0, w2, h2);
       this.setAreaRect(2, w0, h2, w1, h2);
-
       // // エリア設定ライン
-      this.areaLine[8].ishide = false;
-      this.areaLine[9].ishide = true;
-      this.areaLine[10].ishide = false;
-      this.areaLine[11].ishide = false;
-
-      // テキスト表示
-      // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 1 - 10 });
-      // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 1 - 10 });
-      // this.ta3.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 2 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
-
+      this.areaLineHide(false , true , false , false);
     } else if (this.rotation === 2) {
       this.rotation = 3;
       // エリア表示
       this.setAreaRect(0, w0, h0, w2, h1);
       this.setAreaRect(1, w2, h0, w2, h2);
       this.setAreaRect(2, w2, h2, w2, h2);
-
       // // エリア設定ライン
-      this.areaLine[8].ishide = false;
-      this.areaLine[9].ishide = false;
-      this.areaLine[10].ishide = true;
-      this.areaLine[11].ishide = false;
-
-      // テキスト表示
-      // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 2 - 10 });
-      // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 1 - 10 });
-      // this.ta3.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
+      this.areaLineHide(false, false, true, false);
     } else {
       this.rotation = 0;
       // エリア表示
       this.setAreaRect(0, w0, h0, w1, h2);
       this.setAreaRect(1, w0, h2, w2, h2);
       this.setAreaRect(2, w2, h2, w2, h2);
-
       // // エリア設定ライン
-      this.areaLine[8].ishide = true;
-      this.areaLine[9].ishide = false;
-      this.areaLine[10].ishide = false;
-      this.areaLine[11].ishide = false;
-
-      // テキスト表示
-      // this.ta1.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 2 - 10, y: (this.canvasHeight / 4) * 1 - 10 });
-      // this.ta2.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 1 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
-      // this.ta3.getStage().absolutePosition({ x: (this.canvasWidth / 4) * 3 - 10, y: (this.canvasHeight / 4) * 3 - 10 });
+      this.areaLineHide(true, false, false, false);
     }
     for (const l of this.areaLine) {
-      switch (l.name) {
-        case '8':
-        case '9':
-        case '10':
-        case '11':
-          break;
-        default:
-          l.ox = 0;
-          l.oy = 0;
-          break;
-      }
+      l.ox = 0;
+      l.oy = 0;
     }
     this.rectArea();
   }
@@ -976,9 +1383,11 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   public areaNum4XTap() {
     if (this.isYline === true) {
       if (this.isXline === false) {
-        this.isXline = true;
-        this.areaLine[8].color = 'rgba(0,0,0,1)';
-        this.areaLine[9].color = 'rgba(0,0,0,1)';
+        if ( this.areaLine[8].ox === this.areaLine[9].ox ) {
+          this.isXline = true;
+          this.areaLine[8].color = 'rgba(0,0,0,1)';
+          this.areaLine[9].color = 'rgba(0,0,0,1)';
+        }
       } else {
         this.isXline = false;
         this.areaLine[8].color = 'rgba(255,0,0,1)';
@@ -990,9 +1399,11 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
   public areaNum4YTap() {
     if (this.isXline === true) {
       if (this.isYline === false) {
-        this.isYline = true;
-        this.areaLine[10].color = 'rgba(0,0,0,1)';
-        this.areaLine[11].color = 'rgba(0,0,0,1)';
+        if ( this.areaLine[10].oy === this.areaLine[11].oy ) {
+          this.isYline = true;
+          this.areaLine[10].color = 'rgba(0,0,0,1)';
+          this.areaLine[11].color = 'rgba(0,0,0,1)';
+        }
       } else {
         this.isYline = false;
         this.areaLine[10].color = 'rgba(255,0,0,1)';
@@ -1126,15 +1537,23 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     this.setAreaRect(3, (w2) + (ylX), (h2) + (xrY), (w2) - (ylX) + (yrlX), (h2) - (xrY) + (xllY));
   }
 
+
   ngAfterViewInit() {
+
+    console.log('ngAfterViewInit()');
+    // console.log(this.inDoorMode);
+    // console.log(this.areaNum);
+    // console.log(this.isDrag);
+
+    this.inDoorMode = 1;
 
     const canvas = this.myCanvas.nativeElement;
     canvas.addEventListener('touchstart', this, false);
     canvas.addEventListener('touchend', this, false);
     canvas.addEventListener('touchmove', this, false);
 
-    this.w = canvas.width;
-    this.h = canvas.height;
+    this.w = canvas.width - (this.offsetX * 2);
+    this.h = canvas.height - (this.offsetY * 2);
 
     const w0 = 0;
     const h0 = 0;
@@ -1143,117 +1562,87 @@ export class AreaConfigComponent implements OnInit, AfterViewInit {
     const h1 = this.h;
     const h2 = this.h / 2;
 
-
-
     switch (this.areaNum) {
+      case 0:
+        break;
       case 1:
-        this.areaRect = [
-          { x: w0, y: h0, w: w1, h: h1, ishide: false, color: 'rgba(255,0,0,0.2)' },   // エリア１
-          { x: w0, y: h2, w: w1, h: h2, ishide: true, color: 'rgba(0,255,0,0.2)' },   // エリア２
-          { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(255,255,0,0.2)' },  // エリア３
-          { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(0,0,255,0.2)' }    // エリア４
-        ];
-        this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
-          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
-          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
-          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
-          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
-        ];
+        this.setAreaRectColor(0, 0, false, w0, h0, w1, h1);
+        this.setAreaRectColor(1, 0, true, w0, h2, w1, h2);
+        this.setAreaRectColor(2, 0, true, w2, h2, w2, h2);
+        this.setAreaRectColor(3, 0, true, w2, h2, w2, h2);
+        this.setAreaLine(0, false , w0, h0, w0, h2 );
+        this.setAreaLine(1, false , w0, h2, w0, h1 );
+        this.setAreaLine(2, false , w1, h0, w1, h2 );
+        this.setAreaLine(3, false , w1, h2, w1, h1 );
+        this.setAreaLine(4, false , w0, h0, w2, h0 );
+        this.setAreaLine(5, false , w0, h1, w2, h1 );
+        this.setAreaLine(6, false , w2, h0, w1, h0 );
+        this.setAreaLine(7, false , w2, h1, w1, h1 );
+        this.setAreaLine(8, true, w2, h0, w2, h2 );
+        this.setAreaLine(9, true, w2, h2, w2, h1 );
+        this.setAreaLine(10, true, w0, h2, w2, h2 );
+        this.setAreaLine(11, true, w2, h2, w1, h2 );
         break;
       case 2:
-        this.areaRect = [
-          { x: w0, y: h0, w: w2, h: h1, ishide: false, color: 'rgba(255,0,0,0.2)' },   // エリア１
-          { x: w2, y: h0, w: w2, h: h1, ishide: false, color: 'rgba(0,255,0,0.2)' },   // エリア２
-          { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(255,255,0,0.2)' },  // エリア３
-          { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(0,0,255,0.2)' }    // エリア４
-        ];
-        this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
-          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
-          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
-          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
-          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
-        ];
+        this.setAreaRectColor(0, 0, false, w0, h0, w2, h1);
+        this.setAreaRectColor(1, 0, false, w2, h0, w2, h1);
+        this.setAreaRectColor(2, 0, true, w2, h2, w2, h2);
+        this.setAreaRectColor(3, 0, true, w2, h2, w2, h2);
+        this.setAreaLine(0, false , w0, h0, w0, h2);
+        this.setAreaLine(1, false , w0, h2, w0, h1);
+        this.setAreaLine(2, false , w1, h0, w1, h2);
+        this.setAreaLine(3, false , w1, h2, w1, h1);
+        this.setAreaLine(4, false , w0, h0, w2, h0);
+        this.setAreaLine(5, false , w0, h1, w2, h1);
+        this.setAreaLine(6, false , w2, h0, w1, h0);
+        this.setAreaLine(7, false , w2, h1, w1, h1);
+        this.setAreaLine(8, false , w2, h0, w2, h2);
+        this.setAreaLine(9, false , w2, h2, w2, h1);
+        this.setAreaLine(10, true , w0, h2, w2, h2);
+        this.setAreaLine(11, true , w2, h2, w1, h2);
         break;
       case 3:
-        this.areaRect = [
-          { x: w0, y: h0, w: w1, h: h2, ishide: false, color: 'rgba(255,0,0,0.2)' },   // エリア１
-          { x: w0, y: h2, w: w2, h: h2, ishide: false, color: 'rgba(0,255,0,0.2)' },   // エリア２
-          { x: w2, y: h2, w: w2, h: h2, ishide: false, color: 'rgba(255,255,0,0.2)' },  // エリア３
-          { x: w2, y: h2, w: w2, h: h2, ishide: true, color: 'rgba(0,0,255,0.2)' }    // エリア４
-        ];
-        this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
-          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: true, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
-          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
-          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
-          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
-        ];
+        this.setAreaRectColor(0, 0, false, w0, h0, w1, h2);
+        this.setAreaRectColor(1, 0, false, w0, h2, w2, h2);
+        this.setAreaRectColor(2, 0, false, w2, h2, w2, h2);
+        this.setAreaRectColor(3, 0, true, w2, h2, w2, h2);
+        this.setAreaLine(0, false , w0, h0, w0, h2);
+        this.setAreaLine(1, false , w0, h2, w0, h1);
+        this.setAreaLine(2, false , w1, h0, w1, h2);
+        this.setAreaLine(3, false , w1, h2, w1, h1);
+        this.setAreaLine(4, false , w0, h0, w2, h0);
+        this.setAreaLine(5, false , w0, h1, w2, h1);
+        this.setAreaLine(6, false , w2, h0, w1, h0);
+        this.setAreaLine(7, false , w2, h1, w1, h1);
+        this.setAreaLine(8, true , w2, h0, w2, h2);
+        this.setAreaLine(9, false , w2, h2, w2, h1);
+        this.setAreaLine(10, false , w0, h2, w2, h2);
+        this.setAreaLine(11, false , w2, h2, w1, h2);
         break;
       case 4:
-        this.areaRect = [
-          { x: w0, y: h0, w: w2, h: h2, ishide: false, color: 'rgba(255,0,0,0.2)' },   // エリア１
-          { x: w2, y: h0, w: w2, h: h2, ishide: false, color: 'rgba(0,255,0,0.2)' },   // エリア２
-          { x: w0, y: h2, w: w2, h: h2, ishide: false, color: 'rgba(255,255,0,0.2)' },  // エリア３
-          { x: w2, y: h2, w: w2, h: h2, ishide: false, color: 'rgba(0,0,255,0.2)' }    // エリア４
-        ];
-        this.areaLine = [
-          { name: '0', x1: w0, y1: h0, x2: w0, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 0:縦左上
-          { name: '1', x1: w0, y1: h2, x2: w0, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 1:縦左下
-          { name: '2', x1: w1, y1: h0, x2: w1, y2: h2, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 2:縦左下
-          { name: '3', x1: w1, y1: h2, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 3:縦右下
-          { name: '4', x1: w0, y1: h0, x2: w2, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 4:横左上
-          { name: '5', x1: w0, y1: h1, x2: w2, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 5:横左下
-          { name: '6', x1: w2, y1: h0, x2: w1, y2: h0, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' }, // 6:横右上
-          { name: '7', x1: w2, y1: h1, x2: w1, y2: h1, ox: 0, oy: 0, lw: 4, ishide: false, isMove: false, color: 'rgba(128,128,128,1)' },  // 7:横右下
-          { name: '8', x1: w2, y1: h0, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦上
-          { name: '9', x1: w2, y1: h2, x2: w2, y2: h1, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 縦下
-          { name: '10', x1: w0, y1: h2, x2: w2, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },  // 横右
-          { name: '11', x1: w2, y1: h2, x2: w1, y2: h2, ox: 0, oy: 0, lw: 6, ishide: false, isMove: false, color: 'rgba(0,0,0,1)' },   // 横左
-        ];
+        this.setAreaRectColor(0, 0, false, w0, h0, w2, h2);
+        this.setAreaRectColor(1, 0, false, w2, h0, w2, h2);
+        this.setAreaRectColor(2, 0, false, w0, h2, w2, h2);
+        this.setAreaRectColor(3, 0, false, w2, h2, w2, h2);
+        this.setAreaLine(0, false , w0, h0, w0, h2);
+        this.setAreaLine(1, false , w0, h2, w0, h1);
+        this.setAreaLine(2, false , w1, h0, w1, h2);
+        this.setAreaLine(3, false , w1, h2, w1, h1);
+        this.setAreaLine(4, false , w0, h0, w2, h0);
+        this.setAreaLine(5, false , w0, h1, w2, h1);
+        this.setAreaLine(6, false , w2, h0, w1, h0);
+        this.setAreaLine(7, false , w2, h1, w1, h1);
+        this.setAreaLine(8, false , w2, h0, w2, h2);
+        this.setAreaLine(9, false , w2, h2, w2, h1);
+        this.setAreaLine(10, false , w0, h2, w2, h2);
+        this.setAreaLine(11, false , w2, h2, w1, h2);
         break;
     }
     // console.log(this.areaNum);
 
-    this.draw();
+    this.img = new Image();
+    this.img.src = 'assets/maru.png';
 
-    // const c = this.canvas.getElementById('stage');
-    // console.log(this.can);
-    // if (this.myCanvas.nativeElement.getContext) {
-    //   const img01 = new Image();
-    //   //img01.src = 'assets/img/cat.jpg';
-    //   // img01.onload = () => {
-    //     ctx.drawImage(img01, 0, 0 , 300 , 200 );
-    //     ctx.fillStyle = 'rgba(255,0,0,0.2)';
-    //     ctx.fillRect( 0 , 0, 150, 100);
-    //     ctx.fillStyle = 'rgba(0,256,0,0.2)';
-    //     ctx.fillRect( this.areaRect[0].x , 0, 150, 100);
-    //     ctx.fillStyle = 'rgba(255,255,0,0.2)';
-    //     ctx.fillRect( 0 , 100, 150, 100);
-    //     ctx.fillStyle = 'rgba(0,0,255,0.2)';
-    //     ctx.fillRect( 150 , 100, 150, 100);
-    // };
+    this.draw();
   }
 }
