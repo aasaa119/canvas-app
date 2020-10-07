@@ -35,10 +35,10 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
   /* エリア表示データ */
   public areaRect = [
-    { x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア１
-    { x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア２
-    { x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア３
-    { x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  }   // エリア４
+    { n: 0, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア１
+    { n: 1, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア２
+    { n: 2, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  },  // エリア３
+    { n: 3, x: 0, y: 0, w: 0, h: 0, isHide: false, isTouch: false, area: 0  }   // エリア４
   ];
   public areaLine = [
     { n: 0, x1: 0, y1: 0, x2: 0, y2: 0, ox: 0, oy: 0, isDragEnable: true , isHide: false, isMove: false, color: 'gray' }, // 0:縦左上
@@ -77,22 +77,165 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
         // 室内機設定が変わった時
 
         let isSet = false;
-
+        let rect: any;
         for (const r of this.areaRect) {
           if ( r.area === change.previousValue) {
             isSet = true;
+            rect = r;
+
+            break;
           }
         }
-
 
         if ( isSet === false ) {
           // 室内機の設定を保留する
         } else {
-
+          if ( this.areaNum === 1 ) {
+            this.isDrag = false;
+          } else if ( this.areaNum === 2 ) {
+            if (this.rotation === 0) {
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              } else {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              }
+            } else if ( this.rotation === 1 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            }
+          } else if ( this.areaNum === 3 ) {
+            if ( this.rotation === 0 ) {
+              if ( rect.n === 0 ) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 1 ) {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 2 ) {
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            } else if ( this.rotation === 1 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+              } else if ( rect.n === 1) {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              } else if ( rect === 2 ) {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+              }
+            } else if ( this.rotation === 2 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 1) {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 2 ) {
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[10].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            } else if ( this.rotation === 3 ){
+              if (rect.n === 0) {
+                this.areaLine[0].isDragEnable = false;
+                this.areaLine[1].isDragEnable = false;
+                this.areaLine[4].isDragEnable = false;
+                this.areaLine[5].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+              } else if ( rect.n === 1) {
+                this.areaLine[2].isDragEnable = false;
+                this.areaLine[6].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              } else if ( rect.n === 2 ) {
+                this.areaLine[3].isDragEnable = false;
+                this.areaLine[7].isDragEnable = false;
+                this.areaLine[8].isDragEnable = false;
+                this.areaLine[9].isDragEnable = false;
+                this.areaLine[11].isDragEnable = false;
+              }
+            }
+          } else if ( this.areaNum === 4 ) {
+            if (rect.n === 0) {
+              this.areaLine[0].isDragEnable = false;
+              this.areaLine[4].isDragEnable = false;
+              this.areaLine[8].isDragEnable = false;
+              this.areaLine[10].isDragEnable = false;
+            } else if (rect.n === 1) {
+              this.areaLine[2].isDragEnable = false;
+              this.areaLine[6].isDragEnable = false;
+              this.areaLine[8].isDragEnable = false;
+              this.areaLine[11].isDragEnable = false;
+            } else if (rect.n === 2) {
+              this.areaLine[1].isDragEnable = false;
+              this.areaLine[5].isDragEnable = false;
+              this.areaLine[9].isDragEnable = false;
+              this.areaLine[10].isDragEnable = false;
+            } else if (rect.n === 3) {
+              this.areaLine[3].isDragEnable = false;
+              this.areaLine[7].isDragEnable = false;
+              this.areaLine[9].isDragEnable = false;
+              this.areaLine[11].isDragEnable = false;
+            }
+          }
         }
-
-
-
         // if ( this.areaNum === 1 ) {
         //   for (const r of this.areaRect) {
         //     if ( r.area === 1) {
@@ -209,15 +352,15 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
 
   public yLineOffsetX(l: { ox: number; x1: number; }, x: number, min: number, max: number): number {
     l.ox = x - l.x1;
-    console.log(l.ox);
-    console.log('max:' + max);
-    console.log('min:' + min);
+    // console.log(l.ox);
+    // console.log('max:' + max);
+    // console.log('min:' + min);
     if ( min > l.ox ) {
       l.ox = min;
     } else if ( l.ox > max ) {
       l.ox = max;
     }
-    console.log(l.ox);
+    // console.log(l.ox);
     l.ox = Math.round(l.ox / this.gridx) * this.gridx;
     return(l.ox);
   }
@@ -1021,10 +1164,11 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
     // エリアタッチの検出
     let isTouch = false;
     for (const r of this.areaRect ) {
+      console.log(r);
       if ( r.isHide === false && r.isTouch === true ) {
         if ( (r.x < x ) && ( x < (r.x + r.w)) && (r.y < y ) && ( y < (r.y + r.h)) ) {
           if ( r.area === 0 ) {
-            console.log(this.inDoorMode);
+            console.log(r);
             r.area = this.inDoorMode;
             isTouch = true;
           }
@@ -1397,9 +1541,9 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
   ngAfterViewInit() {
 
     console.log('ngAfterViewInit()');
-    console.log(this.inDoorMode);
-    console.log(this.areaNum);
-    console.log(this.isDrag);
+    // console.log(this.inDoorMode);
+    // console.log(this.areaNum);
+    // console.log(this.isDrag);
 
     this.inDoorMode = 1;
 
@@ -1440,7 +1584,7 @@ export class AreaConfigComponent implements OnInit, AfterViewInit , OnChanges {
         this.setAreaLine(11, true, w2, h2, w1, h2 );
         break;
       case 2:
-        this.setAreaRectColor(0, 0, false, w0, h0, w0, h2);
+        this.setAreaRectColor(0, 0, false, w0, h0, w2, h1);
         this.setAreaRectColor(1, 0, false, w2, h0, w2, h1);
         this.setAreaRectColor(2, 0, true, w2, h2, w2, h2);
         this.setAreaRectColor(3, 0, true, w2, h2, w2, h2);
